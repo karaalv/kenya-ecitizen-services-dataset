@@ -1,0 +1,47 @@
+# Workspace settings
+.vscode/
+
+# Archived notes
+**/archive/
+**/tmp/
+
+# Mac files
+**/.DS_Store
+
+# Windows files
+**/Thumbs.db
+**/Desktop.ini
+
+# Linux files
+*~
+
+# Environment Files
+.env*
+.env.*
+
+# Keys
+keys/
+
+# Python bytecode
+**/__pycache__/
+**.py[cod]
+
+# Python test files
+.pytest_cache/
+
+# Virtual environment
+**/venv/
+
+# Miscellaneous files
+*.bak
+*.tmp
+*.pid
+*.log
+
+# Testing and coverage files
+.coverage
+*.cover
+*.log
+
+# Ruff
+.ruff_cache/

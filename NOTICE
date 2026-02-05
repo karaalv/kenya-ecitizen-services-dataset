@@ -1,0 +1,20 @@
+Kenya eCitizen Services Dataset
+Copyright 2026 Alvin Karanja
+
+This repository contains code and data related to the collection and
+structuring of publicly available information from the Kenya eCitizen
+platform.
+
+The dataset contained herein is an independent, third-party compilation
+derived from publicly accessible sources. It is not affiliated with,
+endorsed by, or produced by the Government of Kenya, the eCitizen platform,
+or any associated government agency.
+
+All original source content remains the property of its respective owners.
+
+The software components of this repository are licensed under the Apache
+License, Version 2.0. The dataset is licensed separately under the Creative
+Commons Attribution 4.0 International License (CC BY 4.0).
+
+This project is provided on an "AS IS" basis, without warranties or
+conditions of any kind.

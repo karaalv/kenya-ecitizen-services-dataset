@@ -1,0 +1,11 @@
+[tool.ruff]
+line-length = 60
+fix = true
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+pydocstyle = { convention = "google" }
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "tab"
