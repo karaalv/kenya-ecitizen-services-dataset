@@ -27,7 +27,7 @@
 
 <!-- TODO: Finish this section after the scrape -->
 - This dataset represents a snapshot of the eCitizen platform. The scrape was performed on `date`, and there are currently no guarantees of ongoing updates.
-- The eCitizen platform reports hosting over 22,000 government services. This scrape captured approximately `number` services.  
+- The eCitizen platform reports hosting over 22,000 government services. This scrape captured approximately `number` services.
   <!-- TODO: Finish this bit with a clear explanation of coverage limitations -->
 
 ## Contents
@@ -85,7 +85,7 @@
 If you use this dataset in your work, please cite it as follows:
 
 > Karanja, A. (2026). Kenya eCitizen Services Dataset.
-> GitHub repository: https://github.com/karaalv/kenya-ecitizen-services-dataset
+> GitHub repository: <https://github.com/karaalv/kenya-ecitizen-services-dataset>
 
 ## Maintenance
 
