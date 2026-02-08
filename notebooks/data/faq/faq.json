@@ -1,0 +1,77 @@
+[
+    {
+        "id": "faq_0",
+        "question": "Who can use eCitizen?",
+        "answer": "Anyone who is a Kenyan citizen, resident or foreigner can access the eCitizen platform by simply registering for an account."
+    },
+    {
+        "id": "faq_1",
+        "question": "Why should you sign up for an eCitizen account?",
+        "answer": "Having an eCitizen account allows Kenyan citizens to have access to all government services, while Foreigners/Residents users have access to some government services conveniently through one click of signing in."
+    },
+    {
+        "id": "faq_2",
+        "question": "How do I pay for services?",
+        "answer": "You can conveniently make electronic payments using your preferred channels, such as mobile money, debit/credit cards, and online banking from local banks. The payment checkout options available on the gateway include M-Pesa, Visa/MasterCard, Airtel Money, E-agent, Cash Deposit through KCB/Equity Bank, Pesalink and RTGS."
+    },
+    {
+        "id": "faq_3",
+        "question": "How do I create an account on eCitizen?",
+        "answer": "Go to the eCitizen website www.ecitizen.go.ke Click on register and select citizen, foreigner or resident accordingly Sign in and access the government service you desire"
+    },
+    {
+        "id": "faq_4",
+        "question": "What is the conveniences fee?",
+        "answer": "The convenience fee is a charge added to the cost of some services billed through the portal."
+    },
+    {
+        "id": "faq_5",
+        "question": "Is my information safe on eCitizen?",
+        "answer": "Data Security is of topmost priority on the eCitizen platform. Among enhanced security measures that protect the platform, two-step authentication is in place through one-time passwords sent to your registered phone number or email every time you access the platform."
+    },
+    {
+        "id": "faq_6",
+        "question": "What is the waiting period after making an application?",
+        "answer": "Most applications need to go through review and approval. Depending on the type of service you are applying for, the waiting period may vary."
+    },
+    {
+        "id": "faq_7",
+        "question": "When paying for a service, how do I confirm that the payment has gone through?",
+        "answer": "Upon making a payment on the eCitizen platform, you shall receive a confirmation receipt that usually contains the reference bill and account of the transaction made."
+    },
+    {
+        "id": "faq_8",
+        "question": "How do I update my Phone number/Email on the eCitizen platform?",
+        "answer": "Once you login into the eCitizen, go to account management and change your phone number or email."
+    },
+    {
+        "id": "faq_9",
+        "question": "When applying for or renewing my passport, where do I go to do my biometrics(fingerprints) when abroad?",
+        "answer": "One can visit the Kenyan Embassy in the country where you are currently located."
+    },
+    {
+        "id": "faq_10",
+        "question": "How long does a single entry eVisa take to be issued?",
+        "answer": "It takes 48 working hours for a Category 2 Visa while it takes 14 working days for a Category 3 Visa to be issued"
+    },
+    {
+        "id": "faq_11",
+        "question": "Can my visa be extended if it expires while I am in Kenya?",
+        "answer": "Yes, the visitors pass can be extended on fns.immigration.go.ke."
+    },
+    {
+        "id": "faq_12",
+        "question": "If I stay in Kenya for more than 3 days, will I need to apply for another transit visa?",
+        "answer": "Note that transit visas are only valid for 72 hours."
+    },
+    {
+        "id": "faq_13",
+        "question": "If I\u2019m unable to use my card to pay, what other payment options are available?",
+        "answer": "Cash deposit is an alternative through KCB and Equity Bank."
+    },
+    {
+        "id": "faq_14",
+        "question": "What should I do if there is a delay in the confirmation of payment?",
+        "answer": "Please wait for the confirmation message from M-Pesa or the Bank before you contact the customer care desk on +254 207 903 260 for further assistance. Do not attempt to make the payment again before receiving confirmation, as you may end up making the payment twice."
+    }
+]
