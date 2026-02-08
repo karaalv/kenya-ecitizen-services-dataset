@@ -1,4 +1,4 @@
-# Legal and Ethical Considerations
+# Kenya eCitizen Services Dataset - Legal and Ethical Considerations
 
 This document summarises the review and interpretation of relevant legal, ethical, and policy provisions applicable to the collection and publication of the Kenya eCitizen Services Dataset. It is intended to explain the decision-making process, constraints respected during scraping, and limitations of liability.
 

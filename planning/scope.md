@@ -16,7 +16,7 @@
 
 ## Desired Dataset Structure
 
-- The dataset is organised into four primary entities:
+- The dataset contains **four primary entities**, with other entities existing to support the structure and relationships between these primary entities:
   - **Services**
     Publicly listed government services available on the eCitizen platform, including their names, responsible agencies and ministries, and links to official service pages.
   - **Agencies**
@@ -33,9 +33,9 @@
 
 ## Dataset Features Cheatsheet
 
-- This section provides a high-level summary of the key fields captured in each dataset entity.
-- It is intended as a quick reference only and does not represent the full dataset schema.
-- For detailed field definitions and constraints, refer to `docs/data_dictionary.md`.
+- This section provides a high-level summary of the key fields desired in each main dataset entity.
+- It is intended as a quick reference to the fields that are expected to be derived in each entity, and is not intended to provide a representative sample of the structure of the dataset or the relationships between entities. For a detailed specification of the dataset schema, including field definitions, data types, and relationships, please refer to the [dataset schema documentation](../docs/schema.md).
+- For detailed field definitions and constraints, refer to the [data dictionary](../docs/data_dictionary.md) and for dataset context and collection notes, refer to the [metadata documentation](../docs/metadata.md).
 
 ### Services
 
