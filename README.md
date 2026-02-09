@@ -31,6 +31,13 @@
 - The eCitizen platform reports hosting over 22,000 government services. This scrape captured approximately `number` services.
   <!-- TODO: Finish this bit with a clear explanation of coverage limitations -->
 
+## Dataset Structure and Documentation
+
+- Documentation describing the dataset structure, field definitions, and relationships is provided in the `docs/` directory:
+  - [schema.md](docs/schema.md) defines the structural schema of the dataset, including entities and their relationships.
+  - [data_dictionary.md](docs/data_dictionary.md) provides detailed definitions and descriptions for each field in the dataset.
+  - [metadata.md](docs/metadata.md) offers context on data sources, collection methodology, and limitations.
+
 ## Contents
 
 - In addition to the final dataset, this repository documents the data collection, processing, and validation steps used to produce the dataset.
