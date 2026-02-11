@@ -124,7 +124,7 @@ validation did not require re-scraping.
 
 This was achieved by:
 
-- saving raw HTML under `data/raw/` per entity and traversal stage,
+- saving raw HTML under `data/raw/` (artefacts are excluded from version control) per entity and traversal stage,
 - saving intermediate outputs and state checkpoints for entity processors,
 - writing temporary state to `data/tmp/` (excluded from version control),
 - logging failures under `data/tmp/logs/` with affected inputs and error context.

@@ -6,9 +6,6 @@ including task scheduling and state management.
 import logging
 from collections import deque
 
-from scraper.classes.scheduler.scheduler_state import (
-	SchedulerStateManager,
-)
 from scraper.exceptions.scheduler_discovery_type_mismatch import (  # noqa: E501
 	SchedulerDiscoveryTypeMismatch,
 )
@@ -17,6 +14,9 @@ from scraper.exceptions.scheduler_phase_failure import (
 )
 from scraper.exceptions.scheduler_process_failure import (
 	SchedulerProcessFailure,
+)
+from scraper.scheduler.scheduler_state import (
+	SchedulerStateManager,
 )
 from scraper.schemas.scheduler_state import (
 	MinistryState,
