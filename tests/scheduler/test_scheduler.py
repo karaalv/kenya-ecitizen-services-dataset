@@ -705,3 +705,86 @@ def test_scheduler_ministries_services_phase_completion():
 
 	# Clear saved state file after test
 	delete_file(scheduler._state_manager.state_file)
+
+
+def test_scheduler_finalisation_checks():
+	"""
+	Test that the Scheduler correctly schedules
+	finalisation check task after all ministries have
+	their services processed, and updates state when
+	the task is completed.
+	"""
+	test_file_name = 'test_scheduler_6_state.json'
+	delete_file(Paths.TEMP_DIR / test_file_name)
+
+	scheduler = Scheduler(state_file_name=test_file_name)
+
+	# Bypass all phases except finalisation checks
+	scheduler._state_manager._state.faq.scraped = True
+	scheduler._state_manager._state.faq.processed = True
+	scheduler._state_manager._state.agencies_list.scraped = True  # noqa: E501
+	scheduler._state_manager._state.agencies_list.processed = True  # noqa: E501
+	scheduler._state_manager._state.ministries_list.scraped = True  # noqa: E501
+	scheduler._state_manager._state.ministries_list.processed = True  # noqa: E501
+	scheduler._state_manager._state.ministry_pages.scraped = True  # noqa: E501
+	scheduler._state_manager._state.ministry_pages.processed = True  # noqa: E501
+	scheduler._state_manager._state.ministry_services.scraped = True  # noqa: E501
+	scheduler._state_manager._state.ministry_services.processed = True  # noqa: E501
+
+	# Assert that next task is finalisation check task
+	task = scheduler.next_task()
+	assert task is not None
+	assert task.scope == ScrapingPhase.FINALISATION
+	assert (
+		task.operation == TaskOperation.FINALISATION_CHECKS
+	)
+	assert isinstance(task.payload, EmptyPayload)
+
+	# Simulate completing finalisation checks task
+	result = TaskResult(
+		task=task,
+		success=True,
+		error_message=None,
+	)
+	scheduler.apply_task_result(result)
+
+	# Check state updates
+	state = scheduler._state_manager.get_state()
+	assert state.finalisation_checks is True
+
+	# Clear saved state file after test
+	delete_file(scheduler._state_manager.state_file)
+
+
+def test_scheduler_completion():
+	"""
+	Test that the Scheduler correctly identifies when the
+	entire scraping process is complete after finalisation
+	checks are marked as completed.
+	"""
+	test_file_name = 'test_scheduler_7_state.json'
+	delete_file(Paths.TEMP_DIR / test_file_name)
+
+	scheduler = Scheduler(state_file_name=test_file_name)
+
+	# Bypass all phases and finalisation checks
+	scheduler._state_manager._state.faq.scraped = True
+	scheduler._state_manager._state.faq.processed = True
+	scheduler._state_manager._state.agencies_list.scraped = True  # noqa: E501
+	scheduler._state_manager._state.agencies_list.processed = True  # noqa: E501
+	scheduler._state_manager._state.ministries_list.scraped = True  # noqa: E501
+	scheduler._state_manager._state.ministries_list.processed = True  # noqa: E501
+	scheduler._state_manager._state.ministry_pages.scraped = True  # noqa: E501
+	scheduler._state_manager._state.ministry_pages.processed = True  # noqa: E501
+	scheduler._state_manager._state.ministry_services.scraped = True  # noqa: E501
+	scheduler._state_manager._state.ministry_services.processed = True  # noqa: E501
+	scheduler._state_manager._state.finalisation_checks = (
+		True  # noqa: E501
+	)
+
+	# Assert that next task is None, indicating completion
+	task = scheduler.next_task()
+	assert task is None
+
+	# Clear saved state file after test
+	delete_file(scheduler._state_manager.state_file)

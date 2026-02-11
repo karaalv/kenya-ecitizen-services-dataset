@@ -565,7 +565,7 @@ class Scheduler:
 				# move to finalisation phase
 				return SchedulerTask(
 					scope=ScrapingPhase.FINALISATION,
-					operation=TaskOperation.FINALISATION_PHASE,
+					operation=TaskOperation.FINALISATION_CHECKS,
 					payload=EmptyPayload(),
 				)
 
@@ -574,7 +574,7 @@ class Scheduler:
 		if not state.finalisation_checks:
 			return SchedulerTask(
 				scope=ScrapingPhase.FINALISATION,
-				operation=TaskOperation.FINALISATION_PHASE,
+				operation=TaskOperation.FINALISATION_CHECKS,
 				payload=EmptyPayload(),
 			)
 
@@ -963,7 +963,7 @@ class Scheduler:
 		"""
 		if (
 			result.task.operation
-			== TaskOperation.FINALISATION_PHASE
+			== TaskOperation.FINALISATION_CHECKS
 		):
 			if result.success:
 				self._state_manager.update_finalisation_state(

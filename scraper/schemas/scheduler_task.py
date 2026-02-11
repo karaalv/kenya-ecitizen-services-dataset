@@ -51,7 +51,7 @@ class TaskOperation(str, Enum):
 
 	# Finalisation operations for any
 	# final steps
-	FINALISATION_PHASE = 'FINALISATION_PHASE'
+	FINALISATION_CHECKS = 'FINALISATION_CHECKS'
 
 
 # --- Scheduler task and payload schemas ---
