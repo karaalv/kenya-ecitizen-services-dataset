@@ -9,6 +9,8 @@ practices.
 import logging
 from pathlib import Path
 
+from scraper.schemas.scheduler_task import SchedulerTask
+
 
 class SafeFormatter(logging.Formatter):
 	"""
@@ -63,3 +65,11 @@ def setup_logging(
 
 	root.addHandler(file_handler)
 	root.addHandler(stream_handler)
+
+
+def get_task_log(task: SchedulerTask) -> str:
+	"""
+	Helper function to create a consistent log string
+	for a given task.
+	"""
+	return f'{task.scope}:{task.operation}'

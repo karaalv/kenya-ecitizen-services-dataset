@@ -150,6 +150,10 @@ class SchedulerState(BaseModel):
 	scraping process across all phases.
 	"""
 
+	model_config = ConfigDict(
+		extra='forbid',
+	)
+
 	faq: StepCheck = Field(
 		default_factory=StepCheck,
 		description=(

@@ -28,6 +28,7 @@ from scraper.schemas.scheduler_task import (
 	TaskOperation,
 	TaskResult,
 )
+from scraper.utils.logging import get_task_log
 
 # logger instance for the scheduler module
 logger = logging.getLogger(__name__)
@@ -38,9 +39,6 @@ class Scheduler:
 	Scheduler class to manage the scraping process,
 	including task scheduling and state management.
 	"""
-
-	# TODO: Add reducers for managing state updates based on
-	# completed tasks and discovered data
 
 	def __init__(self):
 		logger.info('Initializing Scheduler')
@@ -87,15 +85,10 @@ class Scheduler:
 		Initialize the queue of ministries pages
 		to be scraped based on the current state.
 		"""
-		incomplete_ministries = [
-			m
-			for m in state.ministries_detail.values()
-			if not m.complete
-		]
 		ministries = [
 			m
-			for m in incomplete_ministries
-			if not m.page.scraped
+			for m in state.ministries_detail.values()
+			if not m.complete and not m.page.scraped
 		]
 		return deque(ministries)
 
@@ -106,25 +99,24 @@ class Scheduler:
 		Initialize the queue of ministries services
 		to be scraped based on the current state.
 		"""
-		incomplete_ministries = [
+		ministries = [
 			m
 			for m in state.ministries_detail.values()
 			if not m.complete
-		]
-		ministries = [
-			m
-			for m in incomplete_ministries
-			if not m.services.scraped
+			and (
+				not m.services.scraped
+				or not m.services.processed
+			)
 		]
 		ministry_services_queue_registry: deque[
 			tuple[str, deque[ServiceTaskPayload]]
 		] = deque()
 		for m in ministries:
-			ministry_services_queue = deque()
+			ministry_services_scrape_queue = deque()
 			for d in m.departments.values():
 				for a in d.agencies.values():
 					if not a.state.scraped:
-						ministry_services_queue.append(
+						ministry_services_scrape_queue.append(
 							ServiceTaskPayload(
 								ministry_id=m.ministry_id,
 								department_id=d.department_id,
@@ -135,7 +127,10 @@ class Scheduler:
 							)
 						)
 			ministry_services_queue_registry.append(
-				(m.ministry_id, ministry_services_queue)
+				(
+					m.ministry_id,
+					ministry_services_scrape_queue,
+				)
 			)
 
 		return ministry_services_queue_registry
@@ -203,7 +198,7 @@ class Scheduler:
 
 	# --- State update methods for task results ---
 
-	def _apply_ministries_list_processing_result(
+	def _apply_ministries_list_to_scrape_queue(
 		self,
 		ministry_identifiers: MinistryIdentifiers,
 	) -> None:
@@ -229,7 +224,9 @@ class Scheduler:
 			)
 		)
 
-	def _apply_ministry_services_identifier(self) -> None:
+	def _apply_ministry_services_to_scrape_queue(
+		self,
+	) -> None:
 		"""
 		Update the queue for ministries services scraping
 		with the discovered ministry services identifier
@@ -278,30 +275,32 @@ class Scheduler:
 		processed for the ministry services phase.
 		"""
 		state = self._state_manager.get_state()
+		ministry_state = state.ministries_detail.get(
+			ministry_id
+		)
 
-		ministries_with_services_to_process = [
-			m
-			for m in state.ministries_detail.values()
-			if not m.complete
-			and not m.services.processed
-			and m.ministry_id == ministry_id
-		]
+		if not ministry_state:
+			# TODO: Handle case where ministry state is
+			# not found
+			return ServiceTaskListPayload(service_tasks=[])
 
 		service_tasks: list[ServiceTaskPayload] = []
-		for m in ministries_with_services_to_process:
-			for d in m.departments.values():
-				for a in d.agencies.values():
-					if not a.state.processed:
-						service_tasks.append(
-							ServiceTaskPayload(
-								ministry_id=m.ministry_id,
-								department_id=d.department_id,
-								agency_id=a.agency_id,
-								ministry_departments_agencies_url=(
-									a.ministry_departments_agencies_url
-								),
-							)
+		for d in ministry_state.departments.values():
+			for a in d.agencies.values():
+				if (
+					not a.state.processed
+					and a.state.scraped
+				):
+					service_tasks.append(
+						ServiceTaskPayload(
+							ministry_id=ministry_id,
+							department_id=d.department_id,
+							agency_id=a.agency_id,
+							ministry_departments_agencies_url=(
+								a.ministry_departments_agencies_url
+							),
 						)
+					)
 
 		return ServiceTaskListPayload(
 			service_tasks=service_tasks
@@ -437,10 +436,14 @@ class Scheduler:
 				# move state to ministry page processing
 				return SchedulerTask(
 					scope=ScrapingPhase.MINISTRIES_PAGES,
-					operation=TaskOperation.UPDATE_TO_MINISTRY_PAGE_PROCESSING,
-					payload=EmptyPayload(),
+					operation=TaskOperation.MINISTRIES_PAGE_PROCESS,
+					payload=self._get_ministry_pages_to_process(
+						state
+					),
 				)
 
+		# Double check if there are any remaining ministry
+		# pages to process
 		if not state.ministry_pages.processed:
 			return SchedulerTask(
 				scope=ScrapingPhase.MINISTRIES_PAGES,
@@ -451,7 +454,10 @@ class Scheduler:
 			)
 
 		# Ministries services phase
-		if not state.ministry_services.scraped:
+		if (
+			not state.ministry_services.scraped
+			or not state.ministry_services.processed
+		):
 			task = self._next_ministry_service_task()
 			if task:
 				return task
@@ -459,12 +465,13 @@ class Scheduler:
 				# If no more ministry services to scrape,
 				# move to finalisation phase
 				return SchedulerTask(
-					scope=ScrapingPhase.MINISTRIES_SERVICES,
-					operation=TaskOperation.UPDATE_TO_FINALISATION_PHASE,
+					scope=ScrapingPhase.FINALISATION,
+					operation=TaskOperation.FINALISATION_PHASE,
 					payload=EmptyPayload(),
 				)
 
-		# Finalisation phase
+		# Double check all finalisation checks
+		# are done before exiting the scheduler
 		if not state.finalisation_checks:
 			return SchedulerTask(
 				scope=ScrapingPhase.FINALISATION,
@@ -508,6 +515,9 @@ class Scheduler:
 				logger.error(
 					'FAQ processing task failed: %s',
 					result.error_message,
+					extra={
+						'task': get_task_log(result.task)
+					},
 				)
 
 	def _r_agencies_list(self, result: TaskResult) -> None:
@@ -543,6 +553,9 @@ class Scheduler:
 					'Agencies list processing task '
 					'failed: %s',
 					result.error_message,
+					extra={
+						'task': get_task_log(result.task)
+					},
 				)
 
 	def _r_ministries_list(
@@ -566,6 +579,9 @@ class Scheduler:
 					'Ministries list scraping task '
 					'failed: %s',
 					result.error_message,
+					extra={
+						'task': get_task_log(result.task)
+					},
 				)
 		elif (
 			result.task.operation
@@ -585,7 +601,7 @@ class Scheduler:
 					ministry_identifiers,
 					MinistryIdentifiers,
 				):
-					self._apply_ministries_list_processing_result(
+					self._apply_ministries_list_to_scrape_queue(
 						ministry_identifiers=ministry_identifiers
 					)
 				else:
@@ -597,6 +613,9 @@ class Scheduler:
 					'Ministries list processing task '
 					'failed: %s',
 					result.error_message,
+					extra={
+						'task': get_task_log(result.task)
+					},
 				)
 
 	def _r_ministries_pages(
@@ -630,13 +649,20 @@ class Scheduler:
 					self._state_manager.update_ministry_page_scraped_state(
 						ministry_id=ministry_id
 					)
-					self._state_manager._apply_ministry_services_identifier(
+					self._state_manager.apply_ministry_services_identifier(
 						ministry_identifier=ministry_identifier
 					)
 
 					# Remove the ministry from the
 					# scrape queue
 					self._pop_page_scrape_queue(ministry_id)
+
+					# If all pages scraped update global
+					# flag in state
+					q = self._ministries_page_scrape_queue
+					if not q:
+						self._state_manager.check_global_ministries_page_scraped_state()
+
 				else:
 					# TODO: Throw error for unexpected
 					# payload type
@@ -646,6 +672,9 @@ class Scheduler:
 					'Ministry page scraping task '
 					'failed: %s',
 					result.error_message,
+					extra={
+						'task': get_task_log(result.task)
+					},
 				)
 		elif (
 			result.task.operation
@@ -671,6 +700,15 @@ class Scheduler:
 					self._state_manager.update_ministries_page_processed_state(
 						ministry_ids=ministry_ids
 					)
+					# Check if all pages are processed, if
+					# so update the ministries services
+					# scrape queue with the discovered
+					# ministry services identifiers
+					self._state_manager.check_global_ministries_page_processed_state()
+
+					state = self._state_manager.get_state()
+					if state.ministry_pages.processed:
+						self._apply_ministry_services_to_scrape_queue()
 
 				else:
 					# TODO: Throw error for unexpected
@@ -681,6 +719,9 @@ class Scheduler:
 					'Ministry page processing task '
 					'failed: %s',
 					result.error_message,
+					extra={
+						'task': get_task_log(result.task)
+					},
 				)
 
 	def _r_ministries_services(
@@ -730,6 +771,9 @@ class Scheduler:
 					'Ministry service scraping task '
 					'failed: %s',
 					result.error_message,
+					extra={
+						'task': get_task_log(result.task)
+					},
 				)
 		elif (
 			result.task.operation
@@ -762,6 +806,22 @@ class Scheduler:
 					self._pop_service_processing_queue(
 						ministry_id=ministry_id
 					)
+
+					# After each bach of ministry services
+					# is processed, check if all ministries
+					# are scraped for global flag update
+					# note this is done here so the check is
+					# done after each batch of services is
+					# processed, as opposed after when each
+					# service is scraped to avoid
+					# unnecessary checks
+					self._state_manager.check_global_ministry_services_scraped_state()
+
+					# When queue is empty, check if all
+					# ministries have their services
+					# processed for global flag update
+					if not self._ministries_services_queue:
+						self._state_manager.check_global_ministry_services_processed_state()
 				else:
 					# TODO: Throw error for unexpected
 					# payload type
@@ -784,6 +844,9 @@ class Scheduler:
 				logger.error(
 					'Finalisation task failed: %s',
 					result.error_message,
+					extra={
+						'task': get_task_log(result.task)
+					},
 				)
 
 	def apply_task_result(self, result: TaskResult) -> None:
@@ -800,6 +863,10 @@ class Scheduler:
 			logger.error(
 				'No reducer found for task scope: %s',
 				result.task.scope,
+				extra={'task': get_task_log(result.task)},
 			)
+
+		# Save state after applying the task result
+		self._state_manager.save_state()
 
 		# TODO: Deal with errors in task results

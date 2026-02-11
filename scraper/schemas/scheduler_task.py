@@ -53,17 +53,6 @@ class TaskOperation(str, Enum):
 	# final steps
 	FINALISATION_PHASE = 'FINALISATION_PHASE'
 
-	# --- State update operations ---
-	# These operations are used to update the state
-
-	UPDATE_TO_MINISTRY_PAGE_PROCESSING = (
-		'UPDATE_TO_MINISTRY_PAGE_PROCESSING'
-	)
-
-	UPDATE_TO_FINALISATION_PHASE = (
-		'UPDATE_TO_FINALISATION_PHASE'
-	)
-
 
 # --- Scheduler task and payload schemas ---
 
@@ -201,7 +190,7 @@ class SchedulerTask(BaseModel):
 		),
 	)
 	payload: PayloadUnion = Field(
-		default=EmptyPayload(),
+		default_factory=EmptyPayload,
 		description=(
 			'The payload of the task, which may include '
 			'identifiers for the ministry, department and '
@@ -423,7 +412,7 @@ class TaskResult(BaseModel):
 	)
 
 	discovered_data: DiscoveredDataUnion = Field(
-		default=EmptyDiscoveredData(),
+		default_factory=EmptyDiscoveredData,
 		description=(
 			'Any new data discovered during task execution '
 			'that needs to be passed back to the scheduler '

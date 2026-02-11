@@ -97,9 +97,8 @@ class SchedulerStateManager:
 				] = MinistryState(
 					ministry_id=ministry_id,
 				)
-		self.save_state()
 
-	def _apply_ministry_services_identifier(
+	def apply_ministry_services_identifier(
 		self,
 		ministry_identifier: MinistryServicesIdentifier,
 	) -> None:
@@ -161,8 +160,6 @@ class SchedulerStateManager:
 						)
 					)
 
-		self.save_state()
-
 	# --- State update methods ---
 
 	def update_faq_state(
@@ -178,7 +175,6 @@ class SchedulerStateManager:
 			self._state.faq.scraped = scraped
 		if processed is not None:
 			self._state.faq.processed = processed
-		self.save_state()
 
 	def update_agencies_list_state(
 		self,
@@ -193,7 +189,6 @@ class SchedulerStateManager:
 			self._state.agencies_list.scraped = scraped
 		if processed is not None:
 			self._state.agencies_list.processed = processed
-		self.save_state()
 
 	def update_ministries_list_state(
 		self,
@@ -210,7 +205,6 @@ class SchedulerStateManager:
 			self._state.ministries_list.processed = (
 				processed
 			)
-		self.save_state()
 
 	def update_ministry_page_scraped_state(
 		self, ministry_id: str
@@ -228,15 +222,32 @@ class SchedulerStateManager:
 				f'Ministry ID {ministry_id} not found in '
 				'state when updating page scraped state.'
 			)
+
+	def check_global_ministries_page_scraped_state(
+		self,
+	) -> None:
+		"""
+		Check if all ministry pages have been scraped.
+		If so mark the global ministries page step as
+		scraped.
+		"""
 		# If all ministries scraped then mark ministries
 		# pages step scraped as complete
-		all_scraped = all(
-			m.page.scraped
-			for m in self._state.ministries_detail.values()
+		values = self._state.ministries_detail.values()
+		all_scraped = bool(values) and all(
+			m.page.scraped for m in values
 		)
 		if all_scraped:
 			self._state.ministry_pages.scraped = True
-		self.save_state()
+			logger.info(
+				'All ministry pages scraped. '
+				'Marking ministries pages step as scraped.'
+			)
+		else:
+			logger.info(
+				'Not all ministry pages scraped yet. '
+				'Ministries pages step remains not scraped.'
+			)
 
 	def update_ministries_page_processed_state(
 		self, ministry_ids: list[str]
@@ -256,15 +267,32 @@ class SchedulerStateManager:
 					'in state when updating page processed '
 					'state.'
 				)
-		# If all ministries processed then mark ministries
-		# pages step processed as complete
-		all_processed = all(
-			m.page.processed
-			for m in self._state.ministries_detail.values()
+
+	def check_global_ministries_page_processed_state(
+		self,
+	) -> None:
+		"""
+		Check if all ministry pages have been processed.
+		If so mark the global ministries page step as
+		processed.
+		"""
+		values = self._state.ministries_detail.values()
+		all_processed = bool(values) and all(
+			m.page.processed for m in values
 		)
 		if all_processed:
 			self._state.ministry_pages.processed = True
-		self.save_state()
+			logger.info(
+				'All ministry pages processed. '
+				'Marking ministries pages step as '
+				'processed.'
+			)
+		else:
+			logger.info(
+				'Not all ministry pages processed yet. '
+				'Ministries pages step remains not '
+				'processed.'
+			)
 
 	def update_ministry_services_scraped_state(
 		self,
@@ -318,26 +346,44 @@ class SchedulerStateManager:
 
 		# Check if all services under the ministry
 		# have been scraped
-		all_services_scraped = all(
-			a.state.scraped
+		agency_states = [
+			a.state
 			for d in ministry_state.departments.values()
 			for a in d.agencies.values()
+		]
+		all_services_scraped = bool(agency_states) and all(
+			a.scraped for a in agency_states
 		)
 
 		if all_services_scraped:
 			ministry_state.services.scraped = True
 
-		# Check if all ministries globally have their
-		# services scraped
-		all_ministries_services_scraped = all(
-			m.services.scraped
-			for m in self._state.ministries_detail.values()
-		)
+	def check_global_ministry_services_scraped_state(
+		self,
+	) -> None:
+		"""
+		Check if all ministry services have been scraped.
+		If so mark the global ministry services step as
+		scraped.
+		"""
+		values = self._state.ministries_detail.values()
+		all_ministries_services_scraped = bool(
+			values
+		) and all(m.services.scraped for m in values)
 
 		if all_ministries_services_scraped:
 			self._state.ministry_services.scraped = True
-
-		self.save_state()
+			logger.info(
+				'All ministry services scraped. '
+				'Marking ministry services step as '
+				'scraped.'
+			)
+		else:
+			logger.info(
+				'Not all ministry services scraped yet. '
+				'Ministry services step remains not '
+				'scraped.'
+			)
 
 	def update_ministry_services_processed_state(
 		self,
@@ -398,11 +444,14 @@ class SchedulerStateManager:
 
 		# Check if all services under the ministry
 		# have been processed
-		all_services_processed = all(
-			a.state.processed
+		agency_states = [
+			a.state
 			for d in ministry_state.departments.values()
 			for a in d.agencies.values()
-		)
+		]
+		all_services_processed = bool(
+			agency_states
+		) and all(a.processed for a in agency_states)
 
 		if all_services_processed:
 			ministry_state.services.processed = True
@@ -420,16 +469,32 @@ class SchedulerStateManager:
 				'marked as complete.'
 			)
 
-		# Check if all ministries globally have their
-		# services processed
-		all_ministries_services_processed = all(
-			m.services.processed
-			for m in self._state.ministries_detail.values()
-		)
+	def check_global_ministry_services_processed_state(
+		self,
+	) -> None:
+		"""
+		Check if all ministry services have been processed.
+		If so mark the global ministry services step as
+		processed.
+		"""
+		values = self._state.ministries_detail.values()
+		all_ministries_services_processed = bool(
+			values
+		) and all(m.services.processed for m in values)
+
 		if all_ministries_services_processed:
 			self._state.ministry_services.processed = True
-
-		self.save_state()
+			logger.info(
+				'All ministry services processed. '
+				'Marking ministry services step as '
+				'processed.'
+			)
+		else:
+			logger.info(
+				'Not all ministry services processed yet. '
+				'Ministry services step remains not '
+				'processed.'
+			)
 
 	def update_finalisation_state(
 		self,
@@ -440,4 +505,3 @@ class SchedulerStateManager:
 		"""
 		if completed is not None:
 			self._state.finalisation_checks = completed
-		self.save_state()
