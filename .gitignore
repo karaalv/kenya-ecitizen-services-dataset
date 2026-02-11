@@ -5,6 +5,9 @@
 **/archive/
 **/tmp/
 
+# HTML artefacts
+*.html
+
 # Mac files
 **/.DS_Store
 
