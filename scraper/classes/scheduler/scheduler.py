@@ -49,10 +49,14 @@ class Scheduler:
 	including task scheduling and state management.
 	"""
 
-	def __init__(self):
+	def __init__(
+		self, state_file_name: str = 'scheduler_state.json'
+	):
 		logger.info('Initializing Scheduler')
 		# State manager
-		self._state_manager = SchedulerStateManager()
+		self._state_manager = SchedulerStateManager(
+			state_file_name=state_file_name
+		)
 		# Scheduler state
 		self.current_task: SchedulerTask | None = None
 		# Queues for ministries page scraping and
@@ -261,6 +265,7 @@ class Scheduler:
 			self._ministries_services_queue.popleft()
 
 	# --- State update methods for scheduler ---
+
 	def set_and_return_task(
 		self, task: SchedulerTask
 	) -> SchedulerTask:

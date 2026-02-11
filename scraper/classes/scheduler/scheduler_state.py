@@ -34,10 +34,10 @@ class SchedulerStateManager:
 	to disk.
 	"""
 
-	def __init__(self):
-		self.state_file = (
-			Paths.TEMP_DIR / 'scheduler_state.json'
-		)
+	def __init__(
+		self, state_file_name: str = 'scheduler_state.json'
+	):
+		self.state_file = Paths.TEMP_DIR / state_file_name
 		self._state = self._load_state()
 
 	def _load_state(self) -> SchedulerState:

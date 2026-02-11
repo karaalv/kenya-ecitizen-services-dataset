@@ -2,71 +2,17 @@ from scraper.classes.scheduler.scheduler_state import (
 	SchedulerStateManager,
 )
 from scraper.schemas.scheduler_state import SchedulerState
-from scraper.schemas.scheduler_task import (
-	AgencyServicesIdentifier,
-	DepartmentServicesIdentifier,
-	MinistryServicesIdentifier,
-)
 from scraper.utils.hashing import stable_id
 from tests.utils.files import delete_file
+from tests.utils.scheduler import (
+	get_ministry_services_identifier,
+)
 
 # --- Test Constants ---
 
 TEST_MINISTRY_IDS = [
 	stable_id([f'Test Ministry{i}']) for i in range(3)
 ]
-
-
-def _get_agency_service_identifier(
-	agency_id: str = 'Test_Agency',
-) -> AgencyServicesIdentifier:
-	return AgencyServicesIdentifier(
-		agency_id=agency_id,
-		ministry_departments_agencies_url='test_url',
-	)
-
-
-def _get_department_services_identifier(
-	department_id: str = 'Test_Department',
-	agency_ids: list[str] = [  # noqa: B006
-		'Test_Agency1',
-		'Test_Agency2',
-	],
-) -> DepartmentServicesIdentifier:
-	return DepartmentServicesIdentifier(
-		department_id=department_id,
-		agencies={
-			agency_id: _get_agency_service_identifier(
-				agency_id
-			)
-			for agency_id in agency_ids
-		},
-	)
-
-
-def _get_ministry_services_identifier(
-	ministry_id: str = 'Test_Ministry',
-	department_ids: dict[str, list[str]] = {  # noqa: B006
-		'Test_Department1': [
-			'Test_Agency1',
-			'Test_Agency2',
-		],
-		'Test_Department2': [
-			'Test_Agency3',
-			'Test_Agency4',
-		],
-	},
-) -> MinistryServicesIdentifier:
-	return MinistryServicesIdentifier(
-		ministry_id=ministry_id,
-		departments={
-			department_id: _get_department_services_identifier(  # noqa: E501
-				department_id, agency_ids
-			)
-			for department_id, agency_ids in department_ids.items()  # noqa: E501
-		},
-	)
-
 
 # --- Tests for SchedulerState ---
 
@@ -263,7 +209,7 @@ def test_apply_ministry_services_identifier():
 
 	# Then apply the ministry services identifier
 	ministry_services_identifier = (
-		_get_ministry_services_identifier(
+		get_ministry_services_identifier(
 			ministry_id=test_ministry_id,
 			department_ids={
 				test_department_id: [test_agency_id]
@@ -310,7 +256,7 @@ def test_update_ministry_services_scraped_and_processed_state():  # noqa: E501
 
 	# Then apply the ministry services identifier
 	ministry_services_identifier = (
-		_get_ministry_services_identifier(
+		get_ministry_services_identifier(
 			ministry_id=test_ministry_id,
 			department_ids={
 				test_department_id: [test_agency_id]
@@ -389,7 +335,7 @@ def test_check_ministry_services_global_flags():
 	# for both ministries
 	for ministry_id in test_ministry_ids:
 		ministry_services_identifier = (
-			_get_ministry_services_identifier(
+			get_ministry_services_identifier(
 				ministry_id=ministry_id,
 				department_ids={
 					test_department_id: [test_agency_id]
