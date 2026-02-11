@@ -9,6 +9,15 @@ from collections import deque
 from scraper.classes.scheduler.scheduler_state import (
 	SchedulerStateManager,
 )
+from scraper.exceptions.scheduler_discovery_type_mismatch import (  # noqa: E501
+	SchedulerDiscoveryTypeMismatch,
+)
+from scraper.exceptions.scheduler_phase_failure import (
+	SchedulerPhaseFailure,
+)
+from scraper.exceptions.scheduler_process_failure import (
+	SchedulerProcessFailure,
+)
 from scraper.schemas.scheduler_state import (
 	MinistryState,
 	SchedulerState,
@@ -44,6 +53,8 @@ class Scheduler:
 		logger.info('Initializing Scheduler')
 		# State manager
 		self._state_manager = SchedulerStateManager()
+		# Scheduler state
+		self.current_task: SchedulerTask | None = None
 		# Queues for ministries page scraping and
 		# processing tasks
 		self._ministries_page_scrape_queue: deque[
@@ -75,6 +86,58 @@ class Scheduler:
 				self._r_finalisation
 			),
 		}
+
+	# --- Logging and error handling methods ---
+
+	def _phase_failure(
+		self, message: str, task_result: TaskResult
+	) -> None:
+		task_log = get_task_log(task_result.task)
+		logger.error(
+			message,
+			extra={'task': task_log},
+		)
+		raise SchedulerPhaseFailure(
+			message=message,
+			task_log=task_log,
+			task_result=task_result,
+		)
+
+	def _process_failure(
+		self, message: str, task: SchedulerTask
+	) -> None:
+		task_log = get_task_log(task)
+		logger.error(
+			message,
+			extra={'task': task_log},
+		)
+		raise SchedulerProcessFailure(
+			message=message,
+			task_log=task_log,
+			task=task,
+		)
+
+	def _discovery_type_mismatch(
+		self,
+		message: str,
+		target_type: str,
+		observed_type: str,
+		task_result: TaskResult,
+	) -> None:
+		task_log = get_task_log(task_result.task)
+		logger.error(
+			message
+			+ f' Expected type: {target_type}, '
+			+ f'Observed type: {observed_type}',
+			extra={'task': task_log},
+		)
+		raise SchedulerDiscoveryTypeMismatch(
+			message=message,
+			target_type=target_type,
+			observed_type=observed_type,
+			task_log=task_log,
+			task_result=task_result,
+		)
 
 	# --- Queue initialization methods ---
 
@@ -136,6 +199,7 @@ class Scheduler:
 		return ministry_services_queue_registry
 
 	# --- Queue update methods based on task results ---
+
 	def _pop_page_scrape_queue(
 		self, ministry_id: str
 	) -> None:
@@ -196,6 +260,17 @@ class Scheduler:
 		):
 			self._ministries_services_queue.popleft()
 
+	# --- State update methods for scheduler ---
+	def set_and_return_task(
+		self, task: SchedulerTask
+	) -> SchedulerTask:
+		"""
+		Set the current task being sent for execution
+		and return the task.
+		"""
+		self.current_task = task
+		return task
+
 	# --- State update methods for task results ---
 
 	def _apply_ministries_list_to_scrape_queue(
@@ -248,22 +323,18 @@ class Scheduler:
 		Get the list of ministries that still need their
 		detail pages processed.
 		"""
-		incomplete_ministries = [
+		ministries = [
 			m
 			for m in state.ministries_detail.values()
 			if not m.complete
-		]
-		ministries_to_process = [
-			m
-			for m in incomplete_ministries
-			if not m.page.processed
+			and (not m.page.processed and m.page.scraped)
 		]
 		return MinistryTaskListPayload(
 			ministry_ids=[
 				MinistryTaskPayload(
 					ministry_id=m.ministry_id
 				)
-				for m in ministries_to_process
+				for m in ministries
 			]
 		)
 
@@ -280,9 +351,32 @@ class Scheduler:
 		)
 
 		if not ministry_state:
-			# TODO: Handle case where ministry state is
-			# not found
-			return ServiceTaskListPayload(service_tasks=[])
+			if not self.current_task:
+				self._process_failure(
+					message=(
+						f'Ministry with ID {ministry_id} '
+						'not found in state, and no current'
+						' task context available for error '
+						'logging.'
+					),
+					task=SchedulerTask(
+						scope=ScrapingPhase.MINISTRIES_SERVICES,
+						operation=TaskOperation.MINISTRIES_SERVICES_PROCESS,
+						payload=EmptyPayload(),
+					),
+				)
+			else:
+				self._process_failure(
+					message=(
+						f'Ministry with ID {ministry_id} '
+						'not found in state'
+					),
+					task=self.current_task,
+				)
+			# Used to satisfy type checker,
+			# but in practice the above lines
+			# will always raise an exception
+			raise Exception()
 
 		service_tasks: list[ServiceTaskPayload] = []
 		for d in ministry_state.departments.values():
@@ -499,9 +593,9 @@ class Scheduler:
 					scraped=True
 				)
 			else:
-				logger.error(
-					'FAQ scraping task failed: %s',
-					result.error_message,
+				self._phase_failure(
+					message='FAQ scraping task failed',
+					task_result=result,
 				)
 		elif (
 			result.task.operation
@@ -512,12 +606,9 @@ class Scheduler:
 					processed=True
 				)
 			else:
-				logger.error(
-					'FAQ processing task failed: %s',
-					result.error_message,
-					extra={
-						'task': get_task_log(result.task)
-					},
+				self._phase_failure(
+					message='FAQ processing task failed',
+					task_result=result,
 				)
 
 	def _r_agencies_list(self, result: TaskResult) -> None:
@@ -535,10 +626,10 @@ class Scheduler:
 					scraped=True
 				)
 			else:
-				logger.error(
-					'Agencies list scraping task '
-					'failed: %s',
-					result.error_message,
+				self._phase_failure(
+					message='Agencies list scraping '
+					'task failed',
+					task_result=result,
 				)
 		elif (
 			result.task.operation
@@ -549,13 +640,10 @@ class Scheduler:
 					processed=True
 				)
 			else:
-				logger.error(
-					'Agencies list processing task '
-					'failed: %s',
-					result.error_message,
-					extra={
-						'task': get_task_log(result.task)
-					},
+				self._phase_failure(
+					message='Agencies list processing '
+					'task failed',
+					task_result=result,
 				)
 
 	def _r_ministries_list(
@@ -575,13 +663,10 @@ class Scheduler:
 					scraped=True
 				)
 			else:
-				logger.error(
-					'Ministries list scraping task '
-					'failed: %s',
-					result.error_message,
-					extra={
-						'task': get_task_log(result.task)
-					},
+				self._phase_failure(
+					message='Ministries list scraping '
+					'task failed',
+					task_result=result,
 				)
 		elif (
 			result.task.operation
@@ -605,17 +690,23 @@ class Scheduler:
 						ministry_identifiers=ministry_identifiers
 					)
 				else:
-					# TODO: Throw error for unexpected
-					# discovered data type
-					pass
+					self._discovery_type_mismatch(
+						message=(
+							'Ministries list processing '
+							'task returned unexpected type '
+							'of discovered data.'
+						),
+						target_type='MinistryIdentifiers',
+						observed_type=type(
+							result.discovered_data
+						).__name__,
+						task_result=result,
+					)
 			else:
-				logger.error(
-					'Ministries list processing task '
-					'failed: %s',
-					result.error_message,
-					extra={
-						'task': get_task_log(result.task)
-					},
+				self._phase_failure(
+					message='Ministries list processing '
+					'task failed',
+					task_result=result,
 				)
 
 	def _r_ministries_pages(
@@ -664,17 +755,23 @@ class Scheduler:
 						self._state_manager.check_global_ministries_page_scraped_state()
 
 				else:
-					# TODO: Throw error for unexpected
-					# payload type
-					pass
+					self._discovery_type_mismatch(
+						message=(
+							'Ministry page scraping task '
+							'returned unexpected type of '
+							'discovered data.'
+						),
+						target_type='MinistryServicesIdentifier',
+						observed_type=type(
+							result.discovered_data
+						).__name__,
+						task_result=result,
+					)
 			else:
-				logger.error(
-					'Ministry page scraping task '
-					'failed: %s',
-					result.error_message,
-					extra={
-						'task': get_task_log(result.task)
-					},
+				self._phase_failure(
+					message='Ministry page scraping task '
+					'failed',
+					task_result=result,
 				)
 		elif (
 			result.task.operation
@@ -711,17 +808,23 @@ class Scheduler:
 						self._apply_ministry_services_to_scrape_queue()
 
 				else:
-					# TODO: Throw error for unexpected
-					# payload type
-					pass
+					self._discovery_type_mismatch(
+						message=(
+							'Ministries page processing '
+							'task returned unexpected type '
+							'of discovered data.'
+						),
+						target_type='MinistryIdentifiers',
+						observed_type=type(
+							result.discovered_data
+						).__name__,
+						task_result=result,
+					)
 			else:
-				logger.error(
-					'Ministry page processing task '
-					'failed: %s',
-					result.error_message,
-					extra={
-						'task': get_task_log(result.task)
-					},
+				self._phase_failure(
+					message='Ministry page processing task '
+					'failed',
+					task_result=result,
 				)
 
 	def _r_ministries_services(
@@ -763,17 +866,23 @@ class Scheduler:
 						agency_id=service_scraped_identifier.agency_id,
 					)
 				else:
-					# TODO: Throw error for unexpected
-					# payload type
-					pass
+					self._discovery_type_mismatch(
+						message=(
+							'Ministry service scraping task'
+							'task returned unexpected type '
+							'of discovered data.'
+						),
+						target_type='ServicesScrapedIdentifier',
+						observed_type=type(
+							result.discovered_data
+						).__name__,
+						task_result=result,
+					)
 			else:
-				logger.error(
-					'Ministry service scraping task '
-					'failed: %s',
-					result.error_message,
-					extra={
-						'task': get_task_log(result.task)
-					},
+				self._phase_failure(
+					message='Ministry service scraping '
+					'task failed',
+					task_result=result,
 				)
 		elif (
 			result.task.operation
@@ -823,9 +932,24 @@ class Scheduler:
 					if not self._ministries_services_queue:
 						self._state_manager.check_global_ministry_services_processed_state()
 				else:
-					# TODO: Throw error for unexpected
-					# payload type
-					pass
+					self._discovery_type_mismatch(
+						message=(
+							'Ministry services processing '
+							'task returned unexpected type '
+							'of discovered data.'
+						),
+						target_type='ServicesProcessedIdentifier',
+						observed_type=type(
+							result.discovered_data
+						).__name__,
+						task_result=result,
+					)
+			else:
+				self._phase_failure(
+					message='Ministry services processing '
+					'task failed',
+					task_result=result,
+				)
 
 	def _r_finalisation(self, result: TaskResult) -> None:
 		"""
@@ -841,12 +965,9 @@ class Scheduler:
 					completed=True
 				)
 			else:
-				logger.error(
-					'Finalisation task failed: %s',
-					result.error_message,
-					extra={
-						'task': get_task_log(result.task)
-					},
+				self._phase_failure(
+					message='Finalisation task failed',
+					task_result=result,
 				)
 
 	def apply_task_result(self, result: TaskResult) -> None:
@@ -860,13 +981,13 @@ class Scheduler:
 		if reducer:
 			reducer(result)
 		else:
-			logger.error(
-				'No reducer found for task scope: %s',
-				result.task.scope,
-				extra={'task': get_task_log(result.task)},
+			self._process_failure(
+				message=(
+					f'No reducer found for task scope: '
+					f'{result.task.scope}'
+				),
+				task=result.task,
 			)
 
 		# Save state after applying the task result
 		self._state_manager.save_state()
-
-		# TODO: Deal with errors in task results

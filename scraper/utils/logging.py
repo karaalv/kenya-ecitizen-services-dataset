@@ -7,6 +7,7 @@ practices.
 """
 
 import logging
+import traceback
 from pathlib import Path
 
 from scraper.schemas.scheduler_task import SchedulerTask
@@ -73,3 +74,35 @@ def get_task_log(task: SchedulerTask) -> str:
 	for a given task.
 	"""
 	return f'{task.scope}:{task.operation}'
+
+
+def format_exception(e: BaseException) -> str:
+	"""
+	Formats exception details into a string
+	for logging error information in detail.
+
+	Args:
+	e (BaseException): The exception to format.
+
+	Returns:
+	str: A formatted string containing exception
+		details.
+	"""
+	lines: list[str] = []
+	lines.append(f'type={type(e)!r}')
+	lines.append(f'repr={e!r}')
+
+	cause = getattr(e, '__cause__', None)
+	ctx = getattr(e, '__context__', None)
+
+	if cause is not None:
+		lines.append(f'cause_type={type(cause)!r}')
+		lines.append(f'cause_repr={cause!r}')
+
+	if ctx is not None:
+		lines.append(f'context_type={type(ctx)!r}')
+		lines.append(f'context_repr={ctx!r}')
+
+	lines.append('traceback:')
+	lines.append(traceback.format_exc())
+	return '\n'.join(lines)

@@ -505,3 +505,7 @@ class SchedulerStateManager:
 		"""
 		if completed is not None:
 			self._state.finalisation_checks = completed
+			logger.info(
+				'Finalisation checks marked as '
+				f'{completed}.'
+			)
