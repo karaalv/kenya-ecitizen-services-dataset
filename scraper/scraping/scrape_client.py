@@ -7,11 +7,6 @@ import logging
 from collections.abc import Awaitable, Callable
 from typing import TypeVar
 
-from exceptions.scraper import (
-	FatalScrapeError,
-	RetryableScrapeError,
-	ScrapeClientError,
-)
 from playwright.async_api import (
 	Browser,
 	BrowserContext,
@@ -20,7 +15,12 @@ from playwright.async_api import (
 	async_playwright,
 )
 
-from scraping.rate_limiter import (
+from scraper.exceptions.scraper import (
+	FatalScrapeError,
+	RetryableScrapeError,
+	ScrapeClientError,
+)
+from scraper.scraping.rate_limiter import (
 	RateLimiter,
 	RatePolicy,
 	RetryPolicy,
@@ -60,7 +60,6 @@ class ScrapeClient:
 	async def init_browser(self) -> None:
 		if self._context is not None:
 			return
-
 		try:
 			self._playwright = (
 				await async_playwright().start()

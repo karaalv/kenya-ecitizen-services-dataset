@@ -5,9 +5,12 @@ limiting and blocking.
 """
 
 import asyncio
+import logging
 import random
 import time
 from dataclasses import dataclass
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -73,6 +76,11 @@ class RateLimiter:
 			self._next_slot_ts = slot_ts + delay_s
 
 			sleep_s = max(0.0, slot_ts - now)
+			logger.info(
+				f'RateLimiter: sleeping for {sleep_s:.2f}s'
+				f' (backoff={self._in_backoff},'
+				f' retry_left={self._retry_left})'
+			)
 
 			self._consume_retry()
 
