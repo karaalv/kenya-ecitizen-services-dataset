@@ -6,7 +6,6 @@ tasks within the Scheduler class.
 
 import logging
 
-from scraper.classes.static.paths import Paths
 from scraper.schemas.scheduler_state import (
 	AgencyServicesState,
 	DepartmentState,
@@ -16,6 +15,7 @@ from scraper.schemas.scheduler_state import (
 from scraper.schemas.scheduler_task import (
 	MinistryServicesIdentifier,
 )
+from scraper.static.paths import Paths
 from scraper.utils.files import (
 	does_file_exist,
 	read_file,

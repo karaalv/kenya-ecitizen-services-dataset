@@ -5,5 +5,5 @@ class SeedUrls:
 	"""
 
 	FAQ_URL = 'https://ecitizen.go.ke/en/help-and-support'
-	AGENCIES_URL = 'https://ecitizen.go.ke/en/agencies'
-	MINISTRIES_URL = 'https://accounts.ecitizen.go.ke/en/home/national-ministries'
+	AGENCIES_LIST_URL = 'https://ecitizen.go.ke/en/agencies'
+	MINISTRIES_LIST_URL = 'https://accounts.ecitizen.go.ke/en/home/national-ministries'

@@ -1,4 +1,4 @@
 """
-This package contains static classes that
+This package contains static resources that
 are used across the scraper module.
 """

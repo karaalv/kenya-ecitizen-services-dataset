@@ -1,5 +1,4 @@
-from scraper.classes.scheduler.scheduler import Scheduler
-from scraper.classes.static.paths import Paths
+from scraper.scheduler.scheduler import Scheduler
 from scraper.schemas.scheduler_state import MinistryState
 from scraper.schemas.scheduler_task import (
 	EmptyPayload,
@@ -14,6 +13,7 @@ from scraper.schemas.scheduler_task import (
 	TaskOperation,
 	TaskResult,
 )
+from scraper.static.paths import Paths
 from scraper.utils.hashing import stable_id
 from tests.utils.files import delete_file
 from tests.utils.scheduler import (

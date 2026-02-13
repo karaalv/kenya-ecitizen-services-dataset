@@ -1,4 +1,4 @@
-from scraper.classes.scheduler.scheduler_state import (
+from scraper.scheduler.scheduler_state import (
 	SchedulerStateManager,
 )
 from scraper.schemas.scheduler_state import SchedulerState

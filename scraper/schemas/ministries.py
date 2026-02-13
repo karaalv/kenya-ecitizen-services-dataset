@@ -6,6 +6,16 @@ scraped from the eCitizen website.
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class MinistryPageData(BaseModel):
+	"""
+	Schema for the content scraped
+	from a Ministry page
+	"""
+
+	overview: str
+	departments_and_agencies: str
+
+
 class MinistryEntry(BaseModel):
 	"""
 	Schema for Ministry entries in the ministries entity,
