@@ -55,13 +55,13 @@ class ServiceEntry(BaseModel):
 	)
 
 	service_description: str | None = Field(
-		None,
+		default=None,
 		description=(
 			'Reserved for future use, currently null.'
 		),
 	)
 	requirements: str | None = Field(
-		None,
+		default=None,
 		description=(
 			'Reserved for future use, currently null.'
 		),

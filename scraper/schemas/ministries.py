@@ -16,6 +16,32 @@ class MinistryPageData(BaseModel):
 	departments_and_agencies: str
 
 
+class MinistryPageProcessedData(BaseModel):
+	"""
+	Schema for processed data from a Ministry
+	page, after applying the processing recipe.
+	"""
+
+	reported_agency_count: int | None
+	reported_service_count: int | None
+	ministry_description: str
+
+
+class MinistryPageAgencyData(BaseModel):
+	"""
+	Schema for the data related to agencies
+	observed on a Ministry page, after applying
+	the processing recipe.
+	"""
+
+	agency_id: str
+	department_id: str
+	ministry_id: str
+	agency_name: str
+	agency_name_hash: str
+	ministry_departments_agencies_url: str
+
+
 class MinistryEntry(BaseModel):
 	"""
 	Schema for Ministry entries in the ministries entity,
@@ -46,33 +72,33 @@ class MinistryEntry(BaseModel):
 		description=('Public ministry description.'),
 	)
 
-	reported_agency_count: int = Field(
+	reported_agency_count: int | None = Field(
 		...,
 		description=(
 			'Agency count reported by the eCitizen '
 			'platform.'
 		),
 	)
-	observed_agency_count: int = Field(
+	observed_agency_count: int | None = Field(
 		...,
 		description=(
 			'Agency count observed in the dataset.'
 		),
 	)
-	reported_service_count: int = Field(
+	reported_service_count: int | None = Field(
 		...,
 		description=(
 			'Service count reported by the eCitizen '
 			'platform.'
 		),
 	)
-	observed_service_count: int = Field(
+	observed_service_count: int | None = Field(
 		...,
 		description=(
 			'Service count observed in the dataset.'
 		),
 	)
-	observed_department_count: int = Field(
+	observed_department_count: int | None = Field(
 		...,
 		description=(
 			'Department count observed in the dataset.'

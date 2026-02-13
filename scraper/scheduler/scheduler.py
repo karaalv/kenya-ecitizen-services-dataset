@@ -456,6 +456,11 @@ class Scheduler:
 		of ministries and their services.
 		"""
 		if not self._ministries_services_queue:
+			logger.info(
+				'[SCHEDULER]\n'
+				'[PHASE INFO]: Ministries services queue '
+				'is empty, moving to next phase.'
+			)
 			return None
 
 		next_ministry_id, services_queue = (
@@ -467,6 +472,13 @@ class Scheduler:
 			# the ministry, and remove the ministry from
 			# the queue as its scraping tasks are complete
 			# (done on task completion and state update)
+			logger.info(
+				f'[SCHEDULER]\n'
+				f'[PHASE INFO]: No more services to scrape '
+				f'for ministry ID {next_ministry_id}, '
+				f'moving to processing tasks for the '
+				f'ministry.'
+			)
 			return ServiceListTask(
 				scope=ScrapingPhase.MINISTRIES_SERVICES,
 				operation=TaskOperation.MINISTRIES_SERVICES_PROCESS,
@@ -479,6 +491,12 @@ class Scheduler:
 			# removing it from the queue yet, we update the
 			# queue and state once the task is completed and
 			# the service is marked as scraped in the state
+			logger.info(
+				f'[SCHEDULER]\n'
+				f'[PHASE INFO]: Scheduling next service to '
+				f'scrape for ministry ID '
+				f'{next_ministry_id}.'
+			)
 			next_service = services_queue[0]
 			return ServiceTask(
 				scope=ScrapingPhase.MINISTRIES_SERVICES,
@@ -497,6 +515,11 @@ class Scheduler:
 
 		# FAQ phase
 		if not state.faq.scraped:
+			logger.info(
+				'[SCHEDULER]\n'
+				'[PHASE INFO]: FAQ page not yet scraped, '
+				'scheduling FAQ page scrape task.'
+			)
 			return EmptyTask(
 				scope=ScrapingPhase.FAQ,
 				operation=TaskOperation.FAQ_SCRAPE,
@@ -504,6 +527,11 @@ class Scheduler:
 			)
 
 		if not state.faq.processed:
+			logger.info(
+				'[SCHEDULER]\n'
+				'[PHASE INFO]: FAQ page not yet processed, '
+				'scheduling FAQ page processing task.'
+			)
 			return EmptyTask(
 				scope=ScrapingPhase.FAQ,
 				operation=TaskOperation.FAQ_PROCESS,
@@ -512,6 +540,12 @@ class Scheduler:
 
 		# Agencies list phase
 		if not state.agencies_list.scraped:
+			logger.info(
+				'[SCHEDULER]\n'
+				'[PHASE INFO]: Agencies list not yet '
+				'scraped, scheduling agencies list scrape '
+				'task.'
+			)
 			return EmptyTask(
 				scope=ScrapingPhase.AGENCIES_LIST,
 				operation=TaskOperation.AGENCIES_LIST_SCRAPE,
@@ -519,6 +553,12 @@ class Scheduler:
 			)
 
 		if not state.agencies_list.processed:
+			logger.info(
+				'[SCHEDULER]\n'
+				'[PHASE INFO]: Agencies list not yet '
+				'processed, scheduling agencies list '
+				'processing task.'
+			)
 			return EmptyTask(
 				scope=ScrapingPhase.AGENCIES_LIST,
 				operation=TaskOperation.AGENCIES_LIST_PROCESS,
@@ -527,6 +567,12 @@ class Scheduler:
 
 		# Ministries list phase
 		if not state.ministries_list.scraped:
+			logger.info(
+				'[SCHEDULER]\n'
+				'[PHASE INFO]: Ministries list not yet '
+				'scraped, scheduling ministries list '
+				'scrape task.'
+			)
 			return EmptyTask(
 				scope=ScrapingPhase.MINISTRIES_LIST,
 				operation=TaskOperation.MINISTRIES_LIST_SCRAPE,
@@ -534,6 +580,12 @@ class Scheduler:
 			)
 
 		if not state.ministries_list.processed:
+			logger.info(
+				'[SCHEDULER]\n'
+				'[PHASE INFO]: Ministries list not yet '
+				'processed, scheduling ministries list '
+				'processing task.'
+			)
 			return EmptyTask(
 				scope=ScrapingPhase.MINISTRIES_LIST,
 				operation=TaskOperation.MINISTRIES_LIST_PROCESS,
@@ -542,12 +594,24 @@ class Scheduler:
 
 		# Ministries page phase
 		if not state.ministry_pages.scraped:
+			logger.info(
+				'[SCHEDULER]\n'
+				'[PHASE INFO]: Ministries pages not yet '
+				'scraped, scheduling next ministry page '
+				'scrape task.'
+			)
 			task = self._next_ministry_page_scrape_task()
 			if task:
 				return task
 			else:
 				# If no more ministry pages to scrape,
 				# move state to ministry page processing
+				logger.info(
+					'[SCHEDULER]\n'
+					'[PHASE INFO]: No more ministry pages '
+					'to scrape, moving to ministry page '
+					'processing phase.'
+				)
 				return MinistryListTask(
 					scope=ScrapingPhase.MINISTRIES_PAGES,
 					operation=TaskOperation.MINISTRIES_PAGE_PROCESS,
@@ -559,6 +623,12 @@ class Scheduler:
 		# Double check if there are any remaining ministry
 		# pages to process
 		if not state.ministry_pages.processed:
+			logger.info(
+				'[SCHEDULER]\n'
+				'[PHASE INFO]: Ministries pages not yet '
+				'processed, scheduling next ministry page '
+				'processing task.'
+			)
 			return MinistryListTask(
 				scope=ScrapingPhase.MINISTRIES_PAGES,
 				operation=TaskOperation.MINISTRIES_PAGE_PROCESS,
@@ -572,12 +642,24 @@ class Scheduler:
 			not state.ministry_services.scraped
 			or not state.ministry_services.processed
 		):
+			logger.info(
+				'[SCHEDULER]\n'
+				'[PHASE INFO]: Ministries services not yet '
+				'scraped or processed, scheduling next '
+				'ministry service task.'
+			)
 			task = self._next_ministry_service_task()
 			if task:
 				return task
 			else:
 				# If no more ministry services to scrape,
 				# move to finalisation phase
+				logger.info(
+					'[SCHEDULER]\n'
+					'[PHASE INFO]: No more ministry '
+					'services to scrape, moving to '
+					'finalisation phase.'
+				)
 				return EmptyTask(
 					scope=ScrapingPhase.FINALISATION,
 					operation=TaskOperation.FINALISATION_CHECKS,
@@ -587,6 +669,12 @@ class Scheduler:
 		# Double check all finalisation checks
 		# are done before exiting the scheduler
 		if not state.finalisation_checks:
+			logger.info(
+				'[SCHEDULER]\n'
+				'[PHASE INFO]: Finalisation checks not yet '
+				'completed, scheduling finalisation checks '
+				'task.'
+			)
 			return EmptyTask(
 				scope=ScrapingPhase.FINALISATION,
 				operation=TaskOperation.FINALISATION_CHECKS,
@@ -594,6 +682,11 @@ class Scheduler:
 			)
 
 		# If all tasks are complete, return None
+		logger.info(
+			'[SCHEDULER]\n'
+			'[PHASE INFO]: All tasks complete, '
+			'no next task to schedule.'
+		)
 		return None
 
 	# --- Task result reducer methods ---

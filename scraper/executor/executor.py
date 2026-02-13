@@ -86,6 +86,12 @@ class Executor:
 	) -> TaskResult:
 		task_log = get_task_log(task)
 		if task.operation == TaskOperation.FAQ_SCRAPE:
+			logger.info(
+				'[EXECUTOR]\n'
+				'[TASK INFO]: Starting FAQ page scrape '
+				'task.',
+				extra={'task': task_log},
+			)
 			_ = await self.faq_handler.scrape_faq_page(
 				task_log=task_log,
 				scrape_client=self.scrape_client,
@@ -117,6 +123,12 @@ class Executor:
 			task.operation
 			== TaskOperation.AGENCIES_LIST_SCRAPE
 		):
+			logger.info(
+				'[EXECUTOR]\n'
+				'[TASK INFO]: Starting agencies list '
+				'scrape task.',
+				extra={'task': task_log},
+			)
 			_ = await self.agencies_handler.scrape_agencies_list_page(  # noqa: E501
 				task_log=task_log,
 				scrape_client=self.scrape_client,
@@ -151,6 +163,12 @@ class Executor:
 			task.operation
 			== TaskOperation.MINISTRIES_LIST_SCRAPE
 		):
+			logger.info(
+				'[EXECUTOR]\n'
+				'[TASK INFO]: Starting ministries list '
+				'scrape task.',
+				extra={'task': task_log},
+			)
 			_ = await self.ministries_handler.scrape_ministries_list_page(  # noqa: E501
 				task_log=task_log,
 				scrape_client=self.scrape_client,
@@ -185,15 +203,30 @@ class Executor:
 			task.operation
 			== TaskOperation.MINISTRIES_PAGE_SCRAPE
 		):
-			data = await self.ministries_handler.scrape_and_package_ministry_page_data(  # noqa: E501
+			logger.info(
+				'[EXECUTOR]\n'
+				'[TASK INFO]: Starting ministries page '
+				'scrape task.',
+				extra={'task': task_log},
+			)
+			(
+				ministry_services_identifier,
+				department_entries,
+				ministry_page_agency_data,
+			) = await self.ministries_handler.scrape_and_package_ministry_page_data(  # noqa: E501
 				ministry_id=task.payload.ministry_id,
 				task_log=task_log,
+				task=task,
 				scrape_client=self.scrape_client,
 			)
+			# TODO: Push department_entries to departments
+			# handler for processing
+			# TODO: Push ministry_page_agency_data to
+			# agencies handler for processing
 			return TaskResult(
 				task=task,
 				success=True,
-				discovered_data=data,
+				discovered_data=ministry_services_identifier,
 			)
 		elif (
 			task.operation
@@ -221,6 +254,12 @@ class Executor:
 			task.operation
 			== TaskOperation.MINISTRIES_SERVICES_SCRAPE
 		):
+			logger.info(
+				'[EXECUTOR]\n'
+				'[TASK INFO]: Starting ministries services '
+				'scrape task.',
+				extra={'task': task_log},
+			)
 			data = await self.ministries_handler.scrape_and_package_ministry_services_data(  # noqa: E501
 				service_task=task.payload,
 				task_log=task_log,

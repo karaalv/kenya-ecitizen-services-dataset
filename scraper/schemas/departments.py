@@ -38,14 +38,14 @@ class DepartmentEntry(BaseModel):
 		),
 	)
 
-	observed_agency_count: int = Field(
+	observed_agency_count: int | None = Field(
 		...,
 		description=(
 			'Number of agencies observed '
 			'under the department.'
 		),
 	)
-	observed_service_count: int = Field(
+	observed_service_count: int | None = Field(
 		...,
 		description=(
 			'Number of services observed '

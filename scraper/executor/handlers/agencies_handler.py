@@ -6,6 +6,14 @@ scope of the scraping process.
 
 import logging
 
+from scraper.exceptions.executor import (
+	ExecutorProcessingFailure,
+)
+from scraper.processing.recipes.agencies_list import (
+	agencies_list_processing_recipe,
+)
+from scraper.schemas.agencies import AgencyEntry
+from scraper.schemas.scheduler_task import SchedulerTask
 from scraper.scraping.recipes.agencies_list import (
 	agencies_list_page_recipe,
 )
@@ -28,6 +36,7 @@ class AgenciesHandler:
 	"""
 
 	def __init__(self) -> None:
+		# Handler configuration
 		self.handler_name = 'AgenciesHandler'
 		self.seed_url = SeedUrls.AGENCIES_LIST_URL
 		self.file = (
@@ -36,7 +45,10 @@ class AgenciesHandler:
 			/ 'agencies_list.html'
 		)
 
-		# --- Scraping methods ---
+		# Entity state
+		self.agency_entries: dict[str, AgencyEntry] = {}
+
+	# --- Scraping methods ---
 
 	async def scrape_agencies_list_page(
 		self,
@@ -74,3 +86,48 @@ class AgenciesHandler:
 		)
 
 		return agencies_list_html
+
+	# --- Processing methods --- #
+
+	def process_agencies_list_data(
+		self,
+		task_log: str,
+		task: SchedulerTask,
+	) -> None:
+		"""
+		Method to process the raw HTML content of the
+		agencies list page into structured AgencyEntry
+		data. Note agencies are initially keyed by
+		agency name hash.
+		"""
+		if not does_file_exist(self.file):
+			logger.error(
+				f'Agencies list file does not exist at '
+				f'{self.file!r}, cannot process data.',
+				extra={'task': task_log},
+			)
+
+			raise ExecutorProcessingFailure(
+				message=f'Agencies list file does not '
+				f'exist at {self.file!r}, cannot process '
+				'data.',
+				task_log=task_log,
+				task=task,
+			)
+
+		html_content = read_file(self.file)
+
+		# Process HTML content into structured data
+		agency_entries = agencies_list_processing_recipe(
+			html=html_content,
+			task_log=task_log,
+			task=task,
+		)
+
+		logger.info(
+			'Agencies list page processed into structured '
+			'AgencyEntry data.',
+			extra={'task': task_log},
+		)
+
+		self.agency_entries = agency_entries

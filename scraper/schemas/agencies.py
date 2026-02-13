@@ -63,6 +63,12 @@ class AgencyEntry(BaseModel):
 			'URL of agency page from the eCitizen platform.'
 		),
 	)
+	observed_service_count: int | None = Field(
+		...,
+		description=(
+			'Number of services observed under the agency.'
+		),
+	)
 	ministry_departments_agencies_url: str = Field(
 		...,
 		description=(

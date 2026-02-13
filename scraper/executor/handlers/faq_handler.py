@@ -6,8 +6,16 @@ scope of the scraping process.
 
 import logging
 
+from scraper.exceptions.executor import (
+	ExecutorProcessingFailure,
+)
+from scraper.processing.recipes.faq_page import (
+	faq_page_processing_recipe,
+)
+from scraper.schemas.faq import FAQEntry
+from scraper.schemas.scheduler_task import SchedulerTask
 from scraper.scraping.recipes.faq_page import (
-	faq_page_recipe,
+	faq_page_scrape_recipe,
 )
 from scraper.scraping.scrape_client import ScrapeClient
 from scraper.static.paths import Paths
@@ -28,11 +36,15 @@ class FAQHandler:
 	"""
 
 	def __init__(self) -> None:
+		# Handler configuration
 		self.handler_name = 'FAQHandler'
 		self.seed_url = SeedUrls.FAQ_URL
 		self.file = Paths.RAW_DATA_DIR / 'faq' / 'faq.html'
 
-		# --- Scraping methods ---
+		# Entity state
+		self.faq_entities: dict[str, FAQEntry] = {}
+
+	# --- Scraping methods ---
 
 	async def scrape_faq_page(
 		self,
@@ -54,7 +66,7 @@ class FAQHandler:
 		faq_html = await scrape_client.run(
 			url=self.seed_url,
 			task_log=task_log,
-			recipe=faq_page_recipe,
+			recipe=faq_page_scrape_recipe,
 		)
 
 		# Save scraped content to file
@@ -69,3 +81,40 @@ class FAQHandler:
 		)
 
 		return faq_html
+
+	# --- Processing methods ---
+
+	def process_faq_page(
+		self, task_log: str, task: SchedulerTask
+	) -> None:
+		"""
+		Method to process the raw HTML content of
+		the FAQ page into structured FAQEntry
+		entities.
+		"""
+		if not does_file_exist(self.file):
+			logger.error(
+				f'FAQ file not found at {self.file!r} '
+				'for processing.',
+				extra={'task': task_log},
+			)
+			raise ExecutorProcessingFailure(
+				message=f'FAQ file not found at '
+				f'{self.file!r} for processing.',
+				task_log=task_log,
+				task=task,
+			)
+
+		faq_html = read_file(self.file)
+
+		self.faq_entities = faq_page_processing_recipe(
+			html=faq_html,
+			task_log=task_log,
+			task=task,
+		)
+
+		logger.info(
+			f'FAQ page processed into'
+			f' {len(self.faq_entities)} entries.',
+			extra={'task': task_log},
+		)
