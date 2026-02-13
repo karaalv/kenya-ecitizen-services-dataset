@@ -137,6 +137,10 @@ class ScrapeClient:
 				page_url=url,
 			)
 
+		logger.info(
+			f'[{task_log}] Starting scrape for {url!r}',
+		)
+
 		for attempt in range(1, self._max_retries + 1):
 			await self._rate_limiter.wait_turn()
 

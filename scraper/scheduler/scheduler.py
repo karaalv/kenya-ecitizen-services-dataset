@@ -17,17 +17,24 @@ from scraper.scheduler.scheduler_state import (
 from scraper.schemas.scheduler_state import (
 	MinistryState,
 	SchedulerState,
-	ScrapingPhase,
 )
 from scraper.schemas.scheduler_task import (
+	# Task payload schemas
 	EmptyPayload,
+	EmptyTask,
 	MinistryIdentifiers,
+	MinistryListTask,
 	MinistryServicesIdentifier,
+	# Task schemas
+	MinistryTask,
 	MinistryTaskListPayload,
 	MinistryTaskPayload,
 	SchedulerTask,
+	ScrapingPhase,
+	ServiceListTask,
 	ServicesProcessedIdentifier,
 	ServicesScrapedIdentifier,
+	ServiceTask,
 	ServiceTaskListPayload,
 	ServiceTaskPayload,
 	TaskOperation,
@@ -97,6 +104,11 @@ class Scheduler:
 			message,
 			extra={'task': task_log},
 		)
+		if task_result.error_message:
+			message += (
+				f' Error details: '
+				f'{task_result.error_message}'
+			)
 		raise SchedulerPhaseFailure(
 			message=message,
 			task_log=task_log,
@@ -131,6 +143,11 @@ class Scheduler:
 			+ f'Observed type: {observed_type}',
 			extra={'task': task_log},
 		)
+		if task_result.error_message:
+			message += (
+				f' Error details: '
+				f'{task_result.error_message}'
+			)
 		raise SchedulerDiscoveryTypeMismatch(
 			message=message,
 			target_type=target_type,
@@ -360,10 +377,12 @@ class Scheduler:
 						' task context available for error '
 						'logging.'
 					),
-					task=SchedulerTask(
+					task=ServiceListTask(
 						scope=ScrapingPhase.MINISTRIES_SERVICES,
 						operation=TaskOperation.MINISTRIES_SERVICES_PROCESS,
-						payload=EmptyPayload(),
+						payload=ServiceTaskListPayload(
+							service_tasks=[]
+						),
 					),
 				)
 			else:
@@ -405,7 +424,7 @@ class Scheduler:
 
 	def _next_ministry_page_scrape_task(
 		self,
-	) -> SchedulerTask | None:
+	) -> MinistryTask | None:
 		"""
 		Determine the next ministry page scrape task
 		based on the queue of ministries to be scraped.
@@ -420,7 +439,7 @@ class Scheduler:
 		next_ministry = self._ministries_page_scrape_queue[
 			0
 		]
-		return SchedulerTask(
+		return MinistryTask(
 			scope=ScrapingPhase.MINISTRIES_PAGES,
 			operation=TaskOperation.MINISTRIES_PAGE_SCRAPE,
 			payload=MinistryTaskPayload(
@@ -430,7 +449,7 @@ class Scheduler:
 
 	def _next_ministry_service_task(
 		self,
-	) -> SchedulerTask | None:
+	) -> ServiceTask | ServiceListTask | None:
 		"""
 		Determine the next ministry service to scrape and
 		process based on the current state and the queue
@@ -448,7 +467,7 @@ class Scheduler:
 			# the ministry, and remove the ministry from
 			# the queue as its scraping tasks are complete
 			# (done on task completion and state update)
-			return SchedulerTask(
+			return ServiceListTask(
 				scope=ScrapingPhase.MINISTRIES_SERVICES,
 				operation=TaskOperation.MINISTRIES_SERVICES_PROCESS,
 				payload=self._get_ministry_services_to_process(
@@ -461,7 +480,7 @@ class Scheduler:
 			# queue and state once the task is completed and
 			# the service is marked as scraped in the state
 			next_service = services_queue[0]
-			return SchedulerTask(
+			return ServiceTask(
 				scope=ScrapingPhase.MINISTRIES_SERVICES,
 				operation=TaskOperation.MINISTRIES_SERVICES_SCRAPE,
 				payload=next_service,
@@ -478,14 +497,14 @@ class Scheduler:
 
 		# FAQ phase
 		if not state.faq.scraped:
-			return SchedulerTask(
+			return EmptyTask(
 				scope=ScrapingPhase.FAQ,
 				operation=TaskOperation.FAQ_SCRAPE,
 				payload=EmptyPayload(),
 			)
 
 		if not state.faq.processed:
-			return SchedulerTask(
+			return EmptyTask(
 				scope=ScrapingPhase.FAQ,
 				operation=TaskOperation.FAQ_PROCESS,
 				payload=EmptyPayload(),
@@ -493,14 +512,14 @@ class Scheduler:
 
 		# Agencies list phase
 		if not state.agencies_list.scraped:
-			return SchedulerTask(
+			return EmptyTask(
 				scope=ScrapingPhase.AGENCIES_LIST,
 				operation=TaskOperation.AGENCIES_LIST_SCRAPE,
 				payload=EmptyPayload(),
 			)
 
 		if not state.agencies_list.processed:
-			return SchedulerTask(
+			return EmptyTask(
 				scope=ScrapingPhase.AGENCIES_LIST,
 				operation=TaskOperation.AGENCIES_LIST_PROCESS,
 				payload=EmptyPayload(),
@@ -508,14 +527,14 @@ class Scheduler:
 
 		# Ministries list phase
 		if not state.ministries_list.scraped:
-			return SchedulerTask(
+			return EmptyTask(
 				scope=ScrapingPhase.MINISTRIES_LIST,
 				operation=TaskOperation.MINISTRIES_LIST_SCRAPE,
 				payload=EmptyPayload(),
 			)
 
 		if not state.ministries_list.processed:
-			return SchedulerTask(
+			return EmptyTask(
 				scope=ScrapingPhase.MINISTRIES_LIST,
 				operation=TaskOperation.MINISTRIES_LIST_PROCESS,
 				payload=EmptyPayload(),
@@ -529,7 +548,7 @@ class Scheduler:
 			else:
 				# If no more ministry pages to scrape,
 				# move state to ministry page processing
-				return SchedulerTask(
+				return MinistryListTask(
 					scope=ScrapingPhase.MINISTRIES_PAGES,
 					operation=TaskOperation.MINISTRIES_PAGE_PROCESS,
 					payload=self._get_ministry_pages_to_process(
@@ -540,7 +559,7 @@ class Scheduler:
 		# Double check if there are any remaining ministry
 		# pages to process
 		if not state.ministry_pages.processed:
-			return SchedulerTask(
+			return MinistryListTask(
 				scope=ScrapingPhase.MINISTRIES_PAGES,
 				operation=TaskOperation.MINISTRIES_PAGE_PROCESS,
 				payload=self._get_ministry_pages_to_process(
@@ -559,7 +578,7 @@ class Scheduler:
 			else:
 				# If no more ministry services to scrape,
 				# move to finalisation phase
-				return SchedulerTask(
+				return EmptyTask(
 					scope=ScrapingPhase.FINALISATION,
 					operation=TaskOperation.FINALISATION_CHECKS,
 					payload=EmptyPayload(),
@@ -568,7 +587,7 @@ class Scheduler:
 		# Double check all finalisation checks
 		# are done before exiting the scheduler
 		if not state.finalisation_checks:
-			return SchedulerTask(
+			return EmptyTask(
 				scope=ScrapingPhase.FINALISATION,
 				operation=TaskOperation.FINALISATION_CHECKS,
 				payload=EmptyPayload(),

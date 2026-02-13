@@ -4,23 +4,7 @@ management which tracks the progress of the
 scraping process.
 """
 
-from enum import Enum
-
 from pydantic import BaseModel, ConfigDict, Field
-
-
-class ScrapingPhase(str, Enum):
-	"""
-	Enum of the main phases of the
-	scraping process.
-	"""
-
-	FAQ = 'FAQ'
-	AGENCIES_LIST = 'AGENCIES_LIST'
-	MINISTRIES_LIST = 'MINISTRIES_LIST'
-	MINISTRIES_PAGES = 'MINISTRIES_PAGES'
-	MINISTRIES_SERVICES = 'MINISTRIES_SERVICES'
-	FINALISATION = 'FINALISATION'
 
 
 class StepCheck(BaseModel):

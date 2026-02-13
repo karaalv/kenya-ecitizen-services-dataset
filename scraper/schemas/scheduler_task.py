@@ -5,10 +5,23 @@ units of work for the scraping process.
 """
 
 from enum import Enum
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from scraper.schemas.scheduler_state import ScrapingPhase
+
+class ScrapingPhase(str, Enum):
+	"""
+	Enum of the main phases of the
+	scraping process.
+	"""
+
+	FAQ = 'FAQ'
+	AGENCIES_LIST = 'AGENCIES_LIST'
+	MINISTRIES_LIST = 'MINISTRIES_LIST'
+	MINISTRIES_PAGES = 'MINISTRIES_PAGES'
+	MINISTRIES_SERVICES = 'MINISTRIES_SERVICES'
+	FINALISATION = 'FINALISATION'
 
 
 class TaskOperation(str, Enum):
@@ -163,42 +176,106 @@ PayloadUnion = (
 	| EmptyPayload
 )
 
+# Define empty operation types
+EmptyOperation = Literal[
+	TaskOperation.FAQ_SCRAPE,
+	TaskOperation.FAQ_PROCESS,
+	TaskOperation.AGENCIES_LIST_SCRAPE,
+	TaskOperation.AGENCIES_LIST_PROCESS,
+	TaskOperation.MINISTRIES_LIST_SCRAPE,
+	TaskOperation.MINISTRIES_LIST_PROCESS,
+	TaskOperation.FINALISATION_CHECKS,
+]
 
-class SchedulerTask(BaseModel):
+
+class MinistryTask(BaseModel):
 	"""
-	Schema for defining individual tasks in the
-	scraping scheduler.
+	Schema for a task that involves
+	an individual ministry page.
 	"""
 
 	model_config = ConfigDict(
 		extra='forbid',
 	)
+	scope: ScrapingPhase
+	operation: Literal[TaskOperation.MINISTRIES_PAGE_SCRAPE]
+	payload: MinistryTaskPayload
 
-	scope: ScrapingPhase = Field(
-		...,
-		description=(
-			'The main phase of the scraping process '
-			'this task belongs to.'
-		),
+
+class MinistryListTask(BaseModel):
+	"""
+	Schema for a task that involves
+	processing a list of ministries.
+	"""
+
+	model_config = ConfigDict(
+		extra='forbid',
 	)
-	operation: TaskOperation = Field(
-		...,
-		description=(
-			'The specific operation this task'
-			' performs, which determines the handler'
-			' used by the executor.'
-		),
+	scope: ScrapingPhase
+	operation: Literal[
+		TaskOperation.MINISTRIES_PAGE_PROCESS
+	]
+	payload: MinistryTaskListPayload
+
+
+class ServiceTask(BaseModel):
+	"""
+	Schema for a task that involves
+	scraping an individual service page.
+	"""
+
+	model_config = ConfigDict(
+		extra='forbid',
 	)
-	payload: PayloadUnion = Field(
+	scope: ScrapingPhase
+	operation: Literal[
+		TaskOperation.MINISTRIES_SERVICES_SCRAPE
+	]
+	payload: ServiceTaskPayload
+
+
+class ServiceListTask(BaseModel):
+	"""
+	Schema for a task that involves
+	processing a list of services.
+	"""
+
+	model_config = ConfigDict(
+		extra='forbid',
+	)
+	scope: ScrapingPhase
+	operation: Literal[
+		TaskOperation.MINISTRIES_SERVICES_PROCESS
+	]
+	payload: ServiceTaskListPayload
+
+
+class EmptyTask(BaseModel):
+	"""
+	Schema for tasks that do not
+	require any specific payload.
+	"""
+
+	model_config = ConfigDict(
+		extra='forbid',
+	)
+	scope: ScrapingPhase
+	operation: EmptyOperation
+	payload: EmptyPayload = Field(
 		default_factory=EmptyPayload,
-		description=(
-			'The payload of the task, which may include '
-			'identifiers for the ministry, department and '
-			'agency the task is related to. This is only '
-			'applicable for tasks related to service '
-			'scraping and processing.'
-		),
 	)
+
+
+SchedulerTask = Annotated[
+	MinistryTask
+	| MinistryListTask
+	| ServiceTask
+	| ServiceListTask
+	| EmptyTask,
+	Field(
+		discriminator='operation',
+	),
+]
 
 
 # --- Scheduler task result schema ---

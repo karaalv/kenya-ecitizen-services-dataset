@@ -26,6 +26,14 @@ class SchedulerProcessFailure(Exception):
 			f'Task:\n{self.task.model_dump_json(indent=2)}'
 		)
 
+	def __repr__(self) -> str:
+		return (
+			f'{self.__class__.__name__}('
+			f'message={self.args[0]!r}, '
+			f'task_log={self.task_log!r}, '
+			f'task={self.task!r})'
+		)
+
 
 class SchedulerPhaseFailure(Exception):
 	"""
@@ -49,6 +57,14 @@ class SchedulerPhaseFailure(Exception):
 			f'Task Result:\n{
 				self.task_result.model_dump_json(indent=2)
 			}'
+		)
+
+	def __repr__(self) -> str:
+		return (
+			f'{self.__class__.__name__}('
+			f'message={self.args[0]!r}, '
+			f'task_log={self.task_log!r}, '
+			f'task_result={self.task_result!r})'
 		)
 
 
@@ -81,4 +97,14 @@ class SchedulerDiscoveryTypeMismatch(Exception):
 			f'Task Result:\n{
 				self.task_result.model_dump_json(indent=2)
 			}'
+		)
+
+	def __repr__(self) -> str:
+		return (
+			f'{self.__class__.__name__}('
+			f'message={self.args[0]!r}, '
+			f'target_type={self.target_type!r}, '
+			f'observed_type={self.observed_type!r}, '
+			f'task_log={self.task_log!r}, '
+			f'task_result={self.task_result!r})'
 		)
