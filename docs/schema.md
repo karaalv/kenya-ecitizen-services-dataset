@@ -95,6 +95,7 @@ and may differ due to platform inconsistencies or subsequent updates.
 | agency_description                     | String | Public agency description                                                   |
 | logo_url                               | String | URL of agency logo image                                                    |
 | agency_url                             | String | URL of agency page from the eCitizen platform                               |
+| observed_service_count                 | Integer| Number of services observed under the agency                                |
 | ministry_departments_agencies_url      | String | Ministry page URL scoped to department and agency via query parameters      |
 
 **Note**:

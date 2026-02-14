@@ -57,6 +57,7 @@ async def ministry_page_recipe(
 			page_url=url,
 		)
 	return MinistryPageData(
+		ministry_id='',  # Placeholder, to be filled
 		overview=overview_html,
 		departments_and_agencies=agencies_html,
 	)

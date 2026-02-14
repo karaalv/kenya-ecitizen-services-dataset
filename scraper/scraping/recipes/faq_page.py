@@ -8,7 +8,9 @@ from playwright.async_api import Page
 from scraper.exceptions.scraper import RetryableScrapeError
 
 
-async def faq_page_recipe(url: str, page: Page) -> str:
+async def faq_page_scrape_recipe(
+	url: str, page: Page
+) -> str:
 	"""
 	Recipe for scraping the FAQ page content.
 	"""

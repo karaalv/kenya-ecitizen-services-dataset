@@ -167,13 +167,19 @@ class ScrapeClient:
 
 			except RetryableScrapeError as e:
 				logger.warning(
+					f'[SCRAPE_CLIENT] Attempt {attempt} '
+					'failed with '
 					f'[{task_log}] retryable: {e!r}'
 				)
 				self._rate_limiter.enter_backoff()
 				continue
 
 			except FatalScrapeError as e:
-				logger.error(f'[{task_log}] fatal: {e!r}')
+				logger.error(
+					f'[SCRAPE_CLIENT] Attempt {attempt} '
+					'failed with '
+					f'[{task_log}] fatal: {e!r}'
+				)
 				raise
 
 			finally:

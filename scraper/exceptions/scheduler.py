@@ -18,6 +18,7 @@ class SchedulerProcessFailure(Exception):
 	) -> None:
 		super().__init__(message)
 		self.task_log = task_log
+		self.message = message
 		self.task = task
 
 	def __str__(self) -> str:
@@ -29,7 +30,7 @@ class SchedulerProcessFailure(Exception):
 	def __repr__(self) -> str:
 		return (
 			f'{self.__class__.__name__}('
-			f'message={self.args[0]!r}, '
+			f'message={self.message!r}, '
 			f'task_log={self.task_log!r}, '
 			f'task={self.task!r})'
 		)
@@ -49,6 +50,7 @@ class SchedulerPhaseFailure(Exception):
 	) -> None:
 		super().__init__(message)
 		self.task_log = task_log
+		self.message = message
 		self.task_result = task_result
 
 	def __str__(self) -> str:
@@ -62,7 +64,7 @@ class SchedulerPhaseFailure(Exception):
 	def __repr__(self) -> str:
 		return (
 			f'{self.__class__.__name__}('
-			f'message={self.args[0]!r}, '
+			f'message={self.message!r}, '
 			f'task_log={self.task_log!r}, '
 			f'task_result={self.task_result!r})'
 		)
@@ -84,6 +86,7 @@ class SchedulerDiscoveryTypeMismatch(Exception):
 		task_result: TaskResult,
 	) -> None:
 		super().__init__(message)
+		self.message = message
 		self.target_type = target_type
 		self.observed_type = observed_type
 		self.task_log = task_log
@@ -102,7 +105,7 @@ class SchedulerDiscoveryTypeMismatch(Exception):
 	def __repr__(self) -> str:
 		return (
 			f'{self.__class__.__name__}('
-			f'message={self.args[0]!r}, '
+			f'message={self.message!r}, '
 			f'target_type={self.target_type!r}, '
 			f'observed_type={self.observed_type!r}, '
 			f'task_log={self.task_log!r}, '

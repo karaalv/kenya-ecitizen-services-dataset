@@ -14,6 +14,7 @@ class ExecutorProcessFailure(Exception):
 	) -> None:
 		super().__init__(message)
 		self.task_log = task_log
+		self.message = message
 		self.task = task
 
 	def __str__(self) -> str:
@@ -25,7 +26,14 @@ class ExecutorProcessFailure(Exception):
 	def __repr__(self) -> str:
 		return (
 			f'{self.__class__.__name__}('
-			f'message={self.args[0]!r}, '
+			f'message={self.message!r}, '
 			f'task_log={self.task_log!r}, '
 			f'task={self.task!r})'
 		)
+
+
+class ExecutorProcessingFailure(ExecutorProcessFailure):
+	"""
+	Exception raised when a specific processing step
+	fails during task execution.
+	"""

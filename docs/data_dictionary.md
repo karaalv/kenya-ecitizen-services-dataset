@@ -204,7 +204,12 @@ Two categories of string fields are used throughout the dataset:
 - **Type**: String (UTF-8 encoded URL)
 - **Example**: <https://adc.go.ke>
 
-### 4.9 `ministry_departments_agencies_url`
+### 4.9 `observed_service_count`
+
+- **Type**: Integer
+- **Example**: 20
+
+### 4.10 `ministry_departments_agencies_url`
 
 - **Type**: String (UTF-8 encoded URL)
 - **Example**: <https://www.ecitizen.go.ke/en/ministries/agriculture?department=agriculture&agency=adc>

@@ -19,6 +19,12 @@ from scraper.executor.handlers.faq_handler import FAQHandler
 from scraper.executor.handlers.ministries_handler import (
 	MinistriesHandler,
 )
+from scraper.schemas.ministries import MinistryEntry
+from scraper.schemas.scheduler_task import (
+	EmptyTask,
+	ScrapingPhase,
+	TaskOperation,
+)
 from scraper.scraping.scrape_client import ScrapeClient
 from scraper.static.paths import Paths
 from scraper.utils.files import does_file_exist
@@ -44,6 +50,10 @@ async def test_scrape_handlers():
 	faq_handler = FAQHandler()
 
 	task_log = 'test_scrape_handlers'
+	task = EmptyTask(
+		scope=ScrapingPhase.FINALISATION,
+		operation=TaskOperation.FINALISATION_CHECKS,
+	)
 
 	faq_html = await faq_handler.scrape_faq_page(
 		task_log=task_log,
@@ -88,12 +98,28 @@ async def test_scrape_handlers():
 	delete_file(ministries_handler.file)
 
 	# Test individual ministry page
+
+	# Add test id and url in handler state
 	test_ministry_id = 'the-state-law-office'
+	ministries_handler.ministry_entries[
+		test_ministry_id
+	] = MinistryEntry(
+		ministry_id=test_ministry_id,
+		ministry_url=TEST_MINISTRY_PAGE_URL,
+		ministry_name='The State Law Office',
+		ministry_description='',
+		reported_agency_count=None,
+		reported_service_count=None,
+		observed_agency_count=None,
+		observed_service_count=None,
+		observed_department_count=None,
+	)
+
 	ministry_page_html = (
 		await ministries_handler.scrape_ministry_page(
 			ministry_id=test_ministry_id,
-			ministry_url=TEST_MINISTRY_PAGE_URL,
 			task_log=task_log,
+			task=task,
 			scrape_client=scrape_client,
 		)
 	)
