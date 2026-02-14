@@ -5,6 +5,11 @@ scraped from the eCitizen website.
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from scraper.schemas.departments import DepartmentEntry
+from scraper.schemas.scheduler_task import (
+	MinistryServicesIdentifier,
+)
+
 
 class MinistryPageData(BaseModel):
 	"""
@@ -12,16 +17,18 @@ class MinistryPageData(BaseModel):
 	from a Ministry page
 	"""
 
+	ministry_id: str
 	overview: str
 	departments_and_agencies: str
 
 
-class MinistryPageProcessedData(BaseModel):
+class MinistryPageOverviewData(BaseModel):
 	"""
 	Schema for processed data from a Ministry
 	page, after applying the processing recipe.
 	"""
 
+	ministry_id: str
 	reported_agency_count: int | None
 	reported_service_count: int | None
 	ministry_description: str
@@ -40,6 +47,21 @@ class MinistryPageAgencyData(BaseModel):
 	agency_name: str
 	agency_name_hash: str
 	ministry_departments_agencies_url: str
+
+
+class MinistryPageProcessingResult(BaseModel):
+	"""
+	Schema for the result of processing a Ministry
+	page, containing both the overview data and the
+	agencies data.
+	"""
+
+	ministry_id: str
+	ministry_services_identifier: MinistryServicesIdentifier
+	department_entries: dict[str, DepartmentEntry]
+	ministry_page_agency_data: dict[
+		str, MinistryPageAgencyData
+	]
 
 
 class MinistryEntry(BaseModel):

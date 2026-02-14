@@ -2,7 +2,9 @@ from scraper.scheduler.scheduler import Scheduler
 from scraper.schemas.scheduler_state import MinistryState
 from scraper.schemas.scheduler_task import (
 	EmptyPayload,
+	MinistryIdentifier,
 	MinistryIdentifiers,
+	MinistryServicesIdentifiersList,
 	MinistryTaskListPayload,
 	MinistryTaskPayload,
 	ScrapingPhase,
@@ -337,8 +339,8 @@ def test_scheduler_ministries_page_phase_completion():
 			task=scrape_task,
 			success=True,
 			error_message=None,
-			discovered_data=get_ministry_services_identifier(
-				ministry_id=ministry_id,
+			discovered_data=MinistryIdentifier(
+				ministry_id=ministry_id
 			),
 		)
 		scheduler.apply_task_result(scrape_result)
@@ -390,12 +392,22 @@ def test_scheduler_ministries_page_phase_completion():
 	) == set(TEST_MINISTRY_IDS)
 
 	# Simulate completing process task
+	ministry_services_identifiers = []
+	for ministry_id in TEST_MINISTRY_IDS:
+		ministry_services_identifier = (
+			get_ministry_services_identifier(
+				ministry_id=ministry_id
+			)
+		)
+		ministry_services_identifiers.append(
+			ministry_services_identifier
+		)
 	process_result = TaskResult(
 		task=process_task,
 		success=True,
 		error_message=None,
-		discovered_data=MinistryIdentifiers(
-			ministry_ids=TEST_MINISTRY_IDS
+		discovered_data=MinistryServicesIdentifiersList(
+			ministry_services_identifiers=ministry_services_identifiers
 		),
 	)
 	scheduler.apply_task_result(process_result)

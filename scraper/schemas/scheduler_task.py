@@ -402,6 +402,24 @@ class MinistryServicesIdentifier(BaseModel):
 	)
 
 
+class MinistryServicesIdentifiersList(BaseModel):
+	"""
+	Schema for a list of ministry services identifiers
+	to be passed back to the scheduler for state updates.
+	"""
+
+	ministry_services_identifiers: list[
+		MinistryServicesIdentifier
+	] = Field(
+		...,
+		description=(
+			'List of ministry services identifiers to be '
+			'passed back to the scheduler for state '
+			'updates.'
+		),
+	)
+
+
 class ServicesScrapedIdentifier(BaseModel):
 	"""
 	Schema for identifiers related to a service that has
@@ -412,21 +430,21 @@ class ServicesScrapedIdentifier(BaseModel):
 	ministry_id: str = Field(
 		...,
 		description=(
-			'Unique identifier for the ministry'
+			'Unique identifier for the ministry '
 			'the service belongs to.'
 		),
 	)
 	department_id: str = Field(
 		...,
 		description=(
-			'Unique identifier for the department'
+			'Unique identifier for the department '
 			'the service belongs to.'
 		),
 	)
 	agency_id: str = Field(
 		...,
 		description=(
-			'Unique identifier for the agency'
+			'Unique identifier for the agency '
 			'the service belongs to.'
 		),
 	)
@@ -460,6 +478,7 @@ DiscoveredDataUnion = (
 	MinistryIdentifier
 	| MinistryIdentifiers
 	| MinistryServicesIdentifier
+	| MinistryServicesIdentifiersList
 	| ServicesScrapedIdentifier
 	| ServicesProcessedIdentifier
 	| EmptyDiscoveredData

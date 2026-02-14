@@ -22,9 +22,10 @@ from scraper.schemas.scheduler_task import (
 	# Task payload schemas
 	EmptyPayload,
 	EmptyTask,
+	MinistryIdentifier,
 	MinistryIdentifiers,
 	MinistryListTask,
-	MinistryServicesIdentifier,
+	MinistryServicesIdentifiersList,
 	# Task schemas
 	MinistryTask,
 	MinistryTaskListPayload,
@@ -845,16 +846,13 @@ class Scheduler:
 				ministry_identifier = result.discovered_data
 				if isinstance(
 					ministry_identifier,
-					MinistryServicesIdentifier,
+					MinistryIdentifier,
 				):
 					ministry_id = (
 						ministry_identifier.ministry_id
 					)
 					self._state_manager.update_ministry_page_scraped_state(
 						ministry_id=ministry_id
-					)
-					self._state_manager.apply_ministry_services_identifier(
-						ministry_identifier=ministry_identifier
 					)
 
 					# Remove the ministry from the
@@ -874,7 +872,7 @@ class Scheduler:
 							'returned unexpected type of '
 							'discovered data.'
 						),
-						target_type='MinistryServicesIdentifier',
+						target_type='MinistryIdentifier',
 						observed_type=type(
 							result.discovered_data
 						).__name__,
@@ -893,23 +891,32 @@ class Scheduler:
 			if result.success:
 				# Update the state to mark the ministry
 				# pages as processed in batch
-				ministry_identifiers = (
+				ministry_services_identifiers_list = (
 					result.discovered_data
 				)
 				if isinstance(
-					ministry_identifiers,
-					MinistryIdentifiers,
+					ministry_services_identifiers_list,
+					MinistryServicesIdentifiersList,
 				):
-					ministry_ids = (
-						ministry_identifiers.ministry_ids
-					)
+					ministry_services_identifiers = ministry_services_identifiers_list.ministry_services_identifiers  # noqa: E501
+					# Update each ministry with its
+					# processing state and the discovered
+					# services identifiers from processing
+					for (
+						ministry_services_identifier
+					) in ministry_services_identifiers:  # noqa: E501
+						ministry_id = ministry_services_identifier.ministry_id  # noqa: E501
+						# Apply processing result to state
+						self._state_manager.update_ministry_page_processed_state_single(
+							ministry_id=ministry_id
+						)
 
-					# Apply the processing result to state
-					# and update the ministries service
-					# queue accordingly
-					self._state_manager.update_ministries_page_processed_state(
-						ministry_ids=ministry_ids
-					)
+						# Apply the discovered ministry
+						# services identifiers
+						self._state_manager.apply_ministry_services_identifier(
+							ministry_identifier=ministry_services_identifier
+						)
+
 					# Check if all pages are processed, if
 					# so update the ministries services
 					# scrape queue with the discovered
@@ -927,7 +934,7 @@ class Scheduler:
 							'task returned unexpected type '
 							'of discovered data.'
 						),
-						target_type='MinistryIdentifiers',
+						target_type='MinistryServicesIdentifiersList',
 						observed_type=type(
 							result.discovered_data
 						).__name__,

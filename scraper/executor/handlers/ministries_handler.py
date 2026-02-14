@@ -28,11 +28,14 @@ from scraper.schemas.ministries import (
 	MinistryEntry,
 	MinistryPageAgencyData,
 	MinistryPageData,
-	MinistryPageProcessedData,
+	MinistryPageOverviewData,
+	MinistryPageProcessingResult,
 )
 from scraper.schemas.scheduler_task import (
 	MinistryIdentifiers,
 	MinistryServicesIdentifier,
+	MinistryServicesIdentifiersList,
+	MinistryTaskListPayload,
 	SchedulerTask,
 	ServicesProcessedIdentifier,
 	ServicesScrapedIdentifier,
@@ -154,8 +157,8 @@ class MinistriesHandler:
 	async def scrape_ministry_page(
 		self,
 		ministry_id: str,
-		ministry_url: str,
 		task_log: str,
+		task: SchedulerTask,
 		scrape_client: ScrapeClient,
 	) -> MinistryPageData:
 		"""
@@ -168,10 +171,11 @@ class MinistriesHandler:
 			)
 		)
 
-		ministry_departments_agencies_file = self._build_ministry_departments_agencies_file_path(  # noqa: E501
-			ministry_id
+		ministry_departments_agencies_file = (  # noqa: E501
+			self._build_ministry_departments_agencies_file_path(
+				ministry_id
+			)
 		)
-
 		# If both files already exist,
 		# read and return content
 		if does_file_exist(
@@ -193,15 +197,38 @@ class MinistriesHandler:
 				ministry_departments_agencies_file
 			)
 			return MinistryPageData(
+				ministry_id=ministry_id,
 				overview=overview_html,
 				departments_and_agencies=departments_agencies_html,
 			)
+
+		# Retrieve ministry URL from handler state
+		ministry_entry = self.ministry_entries.get(
+			ministry_id
+		)
+		if not ministry_entry:
+			logger.error(
+				f'Ministry entry not found in handler '
+				f'state for ministry_id {ministry_id} '
+				f' when scraping ministry page.',
+				extra={'task': task_log},
+			)
+			raise ExecutorProcessingFailure(
+				message=f'Ministry entry not found in '
+				f' handler state for ministry_id'
+				f' {ministry_id} when scraping '
+				f'ministry page.',
+				task_log=task_log,
+				task=task,
+			)
+		ministry_url = ministry_entry.ministry_url
 
 		ministry_page_data = await scrape_client.run(
 			url=ministry_url,
 			task_log=task_log,
 			recipe=ministry_page_recipe,
 		)
+		ministry_page_data.ministry_id = ministry_id
 
 		# Save scraped content to files
 		write_file(
@@ -275,95 +302,6 @@ class MinistriesHandler:
 
 	# --- Scrape and process methods ---
 
-	async def scrape_and_package_ministry_page_data(
-		self,
-		ministry_id: str,
-		task_log: str,
-		task: SchedulerTask,
-		scrape_client: ScrapeClient,
-	) -> tuple[
-		MinistryServicesIdentifier,
-		dict[str, DepartmentEntry],
-		dict[str, MinistryPageAgencyData],
-	]:
-		"""
-		Method to scrape an individual ministry page and
-		return the data packaged in a structured format.
-		"""
-		# Retrieve ministry URL from handler state
-		ministry_entry = self.ministry_entries.get(
-			ministry_id
-		)
-		if not ministry_entry:
-			logger.error(
-				f'Ministry entry not found in handler '
-				f'state for ministry_id {ministry_id} '
-				f' when scraping and  packaging ministry '
-				f'page data.',
-				extra={'task': task_log},
-			)
-			raise ExecutorProcessingFailure(
-				message=f'Ministry entry not found in '
-				f' handler state for ministry_id'
-				f' {ministry_id} when scraping and  '
-				f'packaging ministry page data.',
-				task_log=task_log,
-				task=task,
-			)
-		ministry_url = ministry_entry.ministry_url
-
-		# Perform scraping of ministry page data
-		ministry_page_data = (
-			await self.scrape_ministry_page(
-				ministry_id=ministry_id,
-				ministry_url=ministry_url,
-				task_log=task_log,
-				scrape_client=scrape_client,
-			)
-		)
-		# Process ministry overview and departments/agencies
-		# page data
-		ministry_overview_processed_data = (
-			ministry_overview_processing_recipe(
-				html=ministry_page_data.overview,
-			)
-		)
-		ministry_departments_agencies_processed_data = (  # noqa: E501
-			ministry_departments_agencies_processing_recipe(
-				html=ministry_page_data.departments_and_agencies,
-				ministry_id=ministry_id,
-				ministry_url=ministry_url,
-			)
-		)
-
-		# Update handler state with observed data from
-		# processing ministry page data
-		self._apply_ministry_page_processed_data(
-			ministry_id=ministry_id,
-			processed_data=ministry_overview_processed_data,
-			task_log=task_log,
-			task=task,
-		)
-
-		# Build services identifier for the ministry based
-		# on observed data from processing the ministry page
-		department_entries, ministry_page_agency_data = (
-			ministry_departments_agencies_processed_data
-		)
-		ministry_services_identifier = (
-			build_ministry_services_identifier(
-				ministry_id=ministry_id,
-				departments=department_entries,
-				agencies=ministry_page_agency_data,
-			)
-		)
-
-		return (
-			ministry_services_identifier,
-			department_entries,
-			ministry_page_agency_data,
-		)
-
 	async def scrape_and_package_ministry_services_data(
 		self,
 		service_task: ServiceTaskPayload,
@@ -398,7 +336,7 @@ class MinistriesHandler:
 		self,
 		task_log: str,
 		task: SchedulerTask,
-	) -> None:
+	) -> MinistryIdentifiers:
 		"""
 		Method to process the raw HTML content of the
 		ministries list page into structured MinistryEntry
@@ -436,6 +374,234 @@ class MinistriesHandler:
 		)
 
 		self.ministry_entries = ministry_entries
+		return MinistryIdentifiers(
+			ministry_ids=list(ministry_entries.keys()),
+		)
+
+	async def _process_ministry_page_data(
+		self,
+		ministry_id: str,
+		task_log: str,
+		task: SchedulerTask,
+	) -> tuple[
+		MinistryPageProcessingResult,
+		MinistryPageOverviewData,
+	]:
+		"""
+		Method to process the raw HTML content of a
+		ministry page into structured data and update
+		handler state with observed data.
+		"""
+
+		# Check if scraped ministry page data exists in
+		# file, if not raise error as processing cannot be
+		# performed
+		ministry_overview_file = (
+			self._build_ministry_overview_file_path(
+				ministry_id
+			)
+		)
+
+		ministry_departments_agencies_file = (  # noqa: E501
+			self._build_ministry_departments_agencies_file_path(
+				ministry_id
+			)
+		)
+
+		if not does_file_exist(
+			ministry_overview_file
+		) or not does_file_exist(
+			ministry_departments_agencies_file
+		):
+			logger.error(
+				f'Ministry page files do not exist for '
+				f'{ministry_id} at {ministry_overview_file!r} '  # noqa: E501
+				f'and {ministry_departments_agencies_file!r}, '  # noqa: E501
+				f'cannot process data.',
+				extra={'task': task_log},
+			)
+			raise ExecutorProcessingFailure(
+				message=f'Ministry page files do not exist '
+				f'for {ministry_id} at {ministry_overview_file!r} '  # noqa: E501
+				f'and {ministry_departments_agencies_file!r}, '  # noqa: E501
+				f'cannot process data.',
+				task_log=task_log,
+				task=task,
+			)
+
+		# With data, read content from files and process
+		# data into structured format
+		ministry_url = self.ministry_entries[
+			ministry_id
+		].ministry_url
+
+		# Overview data
+		overview_html = read_file(ministry_overview_file)
+		ministry_overview_processed_data = (
+			ministry_overview_processing_recipe(
+				html=overview_html, ministry_id=ministry_id
+			)
+		)
+
+		# Departments and agencies data
+		departments_agencies_html = read_file(
+			ministry_departments_agencies_file
+		)
+		ministry_departments_agencies_processed_data = (  # noqa: E501
+			ministry_departments_agencies_processing_recipe(
+				html=departments_agencies_html,
+				ministry_id=ministry_id,
+				ministry_url=ministry_url,
+			)
+		)
+		department_entries, ministry_page_agency_data = (
+			ministry_departments_agencies_processed_data
+		)
+
+		# Package data into response type for
+		# return and update
+		ministry_services_identifier = (
+			build_ministry_services_identifier(
+				ministry_id=ministry_id,
+				departments=department_entries,
+				agencies=ministry_page_agency_data,
+			)
+		)
+
+		logger.info(
+			f'Ministry page data processed for ministry '
+			f'{ministry_id}.',
+			extra={'task': task_log},
+		)
+		ministry_page_processing_result = MinistryPageProcessingResult(  # noqa: E501
+			ministry_id=ministry_id,
+			ministry_services_identifier=ministry_services_identifier,
+			department_entries=department_entries,
+			ministry_page_agency_data=ministry_page_agency_data,
+		)
+		return (
+			ministry_page_processing_result,
+			ministry_overview_processed_data,
+		)
+
+	async def process_ministries_pages_data(
+		self,
+		ministry_task_list: MinistryTaskListPayload,
+		task_log: str,
+		task: SchedulerTask,
+	) -> tuple[
+		MinistryServicesIdentifiersList,
+		list[DepartmentEntry],
+		list[MinistryPageAgencyData],
+	]:
+		"""
+		Method to process the raw HTML content of all
+		ministry pages into structured data and update
+		handler state with observed data.
+		"""
+		# Check which ministries have been scheduled
+		# for processing from request
+		ministry_tasks = [
+			ministry_task.ministry_id
+			for ministry_task in ministry_task_list.ministry_ids  # noqa: E501
+		]
+
+		# Process each ministry page data in parallel and
+		# gather results.
+		tasks = [
+			asyncio.create_task(
+				self._process_ministry_page_data(
+					ministry_id=ministry_id,
+					task_log=task_log,
+					task=task,
+				)
+			)
+			for ministry_id in ministry_tasks
+		]
+
+		results_pure: list[
+			tuple[
+				MinistryPageProcessingResult,
+				MinistryPageOverviewData,
+			]
+			| BaseException
+		] = await asyncio.gather(
+			*tasks, return_exceptions=True
+		)
+		results: list[
+			tuple[
+				MinistryPageProcessingResult,
+				MinistryPageOverviewData,
+			]
+		] = []
+
+		# Raise error if any of the tasks resulted in an
+		# exception, use this to filter out successful
+		# results from failed ones
+		for result in results_pure:
+			if isinstance(result, BaseException):
+				logger.error(
+					f'Error processing ministry page data: '
+					f'{result!r}',
+					extra={'task': task_log},
+				)
+				raise ExecutorProcessingFailure(
+					message=f'Error processing ministry '
+					f'page data: {result!r}',
+					task_log=task_log,
+					task=task,
+				)
+			else:
+				results.append(result)
+
+		# Batch apply observed data from
+		# processing each ministry page to handler state
+		ministry_page_overview_data_list = [
+			result[1] for result in results
+		]
+		self._apply_ministry_page_overview_data_batch(
+			ministry_page_overview_data_list,
+			task_log,
+			task,
+		)
+
+		# Extract data from results to pass
+		# to other handlers and update scheduler state
+		ministry_page_processing_results = [
+			result[0] for result in results
+		]
+
+		# Flatten data for return
+		ministry_services_identifiers: list[
+			MinistryServicesIdentifier
+		] = []
+		department_entries: list[DepartmentEntry] = []
+		ministry_page_agency_data: list[
+			MinistryPageAgencyData
+		] = []
+		for (
+			ministry_page_processing_result
+		) in ministry_page_processing_results:
+			ministry_services_identifiers.append(
+				ministry_page_processing_result.ministry_services_identifier
+			)
+			department_entries.extend(
+				ministry_page_processing_result.department_entries.values()
+			)
+			ministry_page_agency_data.extend(
+				ministry_page_processing_result.ministry_page_agency_data.values()
+			)
+
+		ministry_services_identifiers_list = (  # noqa: E501
+			MinistryServicesIdentifiersList(
+				ministry_services_identifiers=ministry_services_identifiers
+			)
+		)
+		return (
+			ministry_services_identifiers_list,
+			department_entries,
+			ministry_page_agency_data,
+		)
 
 	async def _process_ministry_page_services_data(
 		self,
@@ -670,10 +836,10 @@ class MinistriesHandler:
 
 	# --- Ministry state update methods --- #
 
-	def _apply_ministry_page_processed_data(
+	def _apply_ministry_page_overview_data(
 		self,
 		ministry_id: str,
-		processed_data: MinistryPageProcessedData,
+		overview_data: MinistryPageOverviewData,
 		task_log: str,
 		task: SchedulerTask,
 	) -> None:
@@ -703,11 +869,32 @@ class MinistriesHandler:
 
 		# Update ministry entry with observed data
 		ministry_entry.ministry_description = (
-			processed_data.ministry_description
+			overview_data.ministry_description
 		)
 		ministry_entry.reported_agency_count = (
-			processed_data.reported_agency_count
+			overview_data.reported_agency_count
 		)
 		ministry_entry.reported_service_count = (
-			processed_data.reported_service_count
+			overview_data.reported_service_count
 		)
+
+	def _apply_ministry_page_overview_data_batch(
+		self,
+		ministry_page_overview_results: list[
+			MinistryPageOverviewData
+		],
+		task_log: str,
+		task: SchedulerTask,
+	) -> None:
+		"""
+		Method to update the handler state for a batch of
+		ministries with the data observed from processing
+		the ministry overview pages.
+		"""
+		for overview_data in ministry_page_overview_results:
+			self._apply_ministry_page_overview_data(
+				ministry_id=overview_data.ministry_id,
+				overview_data=overview_data,
+				task_log=task_log,
+				task=task,
+			)

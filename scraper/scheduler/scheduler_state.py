@@ -268,6 +268,23 @@ class SchedulerStateManager:
 					'state.'
 				)
 
+	def update_ministry_page_processed_state_single(
+		self, ministry_id: str
+	) -> None:
+		"""
+		Update the state of the ministry page processing
+		step for a specific ministry.
+		"""
+		if ministry_id in self._state.ministries_detail:
+			self._state.ministries_detail[
+				ministry_id
+			].page.processed = True
+		else:
+			logger.warning(
+				f'Ministry ID {ministry_id} not found in '
+				'state when updating page processed state.'
+			)
+
 	def check_global_ministries_page_processed_state(
 		self,
 	) -> None:

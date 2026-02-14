@@ -198,7 +198,7 @@ def test_ministry_overview_processing_recipe():
 	"""
 	html = read_file(TEST_MINISTRY_OVERVIEW_PAGE_PATH)
 	processed_data = ministry_overview_processing_recipe(
-		html
+		html=html, ministry_id='test_ministry_id'
 	)
 
 	# Basic assertions to check if the processing worked

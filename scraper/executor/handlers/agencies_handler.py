@@ -46,6 +46,12 @@ class AgenciesHandler:
 		)
 
 		# Entity state
+		# Used to store metadata keyed by agency name hash
+		self.agency_entries_metadata: dict[
+			str, AgencyEntry
+		] = {}
+		# Used to store final structured data keyed
+		# by agency ID
 		self.agency_entries: dict[str, AgencyEntry] = {}
 
 	# --- Scraping methods ---
@@ -130,4 +136,4 @@ class AgenciesHandler:
 			extra={'task': task_log},
 		)
 
-		self.agency_entries = agency_entries
+		self.agency_entries_metadata = agency_entries

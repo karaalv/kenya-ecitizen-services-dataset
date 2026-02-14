@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from scraper.schemas.departments import DepartmentEntry
 from scraper.schemas.ministries import (
 	MinistryPageAgencyData,
-	MinistryPageProcessedData,
+	MinistryPageOverviewData,
 )
 from scraper.schemas.services import ServiceEntry
 from scraper.utils.hashing import stable_id
@@ -23,8 +23,8 @@ from scraper.utils.normalise import (
 
 
 def ministry_overview_processing_recipe(
-	html: str,
-) -> MinistryPageProcessedData:
+	html: str, ministry_id: str
+) -> MinistryPageOverviewData:
 	"""
 	Recipe to process the raw HTML content of
 	the ministry overview page.
@@ -67,7 +67,8 @@ def ministry_overview_processing_recipe(
 		str(description_raw) if description_raw else ''
 	)
 
-	return MinistryPageProcessedData(
+	return MinistryPageOverviewData(
+		ministry_id=ministry_id,
 		reported_agency_count=parse_int(total_agencies_str),
 		reported_service_count=parse_int(
 			total_services_str

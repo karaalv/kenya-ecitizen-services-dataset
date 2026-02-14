@@ -24,6 +24,7 @@ from scraper.executor.handlers.services_handler import (
 	ServicesHandler,
 )
 from scraper.schemas.scheduler_task import (
+	MinistryIdentifier,
 	SchedulerTask,
 	ScrapingPhase,
 	TaskOperation,
@@ -92,7 +93,7 @@ class Executor:
 				'task.',
 				extra={'task': task_log},
 			)
-			_ = await self.faq_handler.scrape_faq_page(
+			await self.faq_handler.scrape_faq_page(
 				task_log=task_log,
 				scrape_client=self.scrape_client,
 			)
@@ -101,10 +102,19 @@ class Executor:
 				success=True,
 			)
 		elif task.operation == TaskOperation.FAQ_PROCESS:
-			# TODO: Implement FAQ processing logic
+			logger.info(
+				'[EXECUTOR]\n'
+				'[TASK INFO]: Starting FAQ page process '
+				'task.',
+				extra={'task': task_log},
+			)
+			self.faq_handler.process_faq_page(
+				task_log=task_log,
+				task=task,
+			)
 			return TaskResult(
 				task=task,
-				success=False,
+				success=True,
 			)
 
 		# Raise error if operation is not recognised
@@ -141,10 +151,19 @@ class Executor:
 			task.operation
 			== TaskOperation.AGENCIES_LIST_PROCESS
 		):
-			# TODO: Implement FAQ processing logic
+			logger.info(
+				'[EXECUTOR]\n'
+				'[TASK INFO]: Starting agencies list '
+				'process task.',
+				extra={'task': task_log},
+			)
+			self.agencies_handler.process_agencies_list_data(
+				task_log=task_log,
+				task=task,
+			)
 			return TaskResult(
 				task=task,
-				success=False,
+				success=True,
 			)
 
 		# Raise error if operation is not recognised
@@ -169,7 +188,7 @@ class Executor:
 				'scrape task.',
 				extra={'task': task_log},
 			)
-			_ = await self.ministries_handler.scrape_ministries_list_page(  # noqa: E501
+			await self.ministries_handler.scrape_ministries_list_page(  # noqa: E501
 				task_log=task_log,
 				scrape_client=self.scrape_client,
 			)
@@ -181,10 +200,20 @@ class Executor:
 			task.operation
 			== TaskOperation.MINISTRIES_LIST_PROCESS
 		):
-			# TODO: Implement FAQ processing logic
+			logger.info(
+				'[EXECUTOR]\n'
+				'[TASK INFO]: Starting ministries list '
+				'process task.',
+				extra={'task': task_log},
+			)
+			ministry_identifiers = self.ministries_handler.process_ministries_list_data(  # noqa: E501
+				task_log=task_log,
+				task=task,
+			)
 			return TaskResult(
 				task=task,
-				success=False,
+				success=True,
+				discovered_data=ministry_identifiers,
 			)
 
 		# Raise error if operation is not recognised
@@ -209,15 +238,52 @@ class Executor:
 				'scrape task.',
 				extra={'task': task_log},
 			)
-			(
-				ministry_services_identifier,
-				department_entries,
-				ministry_page_agency_data,
-			) = await self.ministries_handler.scrape_and_package_ministry_page_data(  # noqa: E501
+			page_data = await self.ministries_handler.scrape_ministry_page(  # noqa: E501
 				ministry_id=task.payload.ministry_id,
 				task_log=task_log,
 				task=task,
 				scrape_client=self.scrape_client,
+			)
+			return TaskResult(
+				task=task,
+				success=True,
+				discovered_data=MinistryIdentifier(
+					ministry_id=page_data.ministry_id
+				),
+			)
+		elif (
+			task.operation
+			== TaskOperation.MINISTRIES_PAGE_PROCESS
+		):
+			"""
+			Note that the main processing for each ministry
+			page happens as the data is scraped, as we apply
+			the processing recipes to extract and structure
+			the data to inform the next steps of the
+			scheduler. This step assures that all page data
+			is processed into structured data in state
+			before we proceed to the next steps.
+			"""
+			logger.info(
+				'[EXECUTOR]\n'
+				'[TASK INFO]: Starting ministries page '
+				'process task.',
+				extra={'task': task_log},
+			)
+			# Batch processing of all ministries page data
+			# to ensure all data is processed before moving
+			# to next step in scheduler. This is because
+			# the processing step is where we extract the
+			# structured data needed to inform the next
+			# steps of the scheduler.
+			(
+				ministry_services_identifiers_list,
+				department_entry_list,
+				ministry_page_agency_data_list,
+			) = await self.ministries_handler.process_ministries_pages_data(  # noqa: E501
+				ministry_task_list=task.payload,
+				task_log=task_log,
+				task=task,
 			)
 			# TODO: Push department_entries to departments
 			# handler for processing
@@ -226,17 +292,7 @@ class Executor:
 			return TaskResult(
 				task=task,
 				success=True,
-				discovered_data=ministry_services_identifier,
-			)
-		elif (
-			task.operation
-			== TaskOperation.MINISTRIES_PAGE_PROCESS
-		):
-			# TODO: Implement processing logic for
-			# ministry page data
-			return TaskResult(
-				task=task,
-				success=False,
+				discovered_data=ministry_services_identifiers_list,
 			)
 		# Raise error if operation is not recognised
 		raise ExecutorProcessFailure(
@@ -260,7 +316,7 @@ class Executor:
 				'scrape task.',
 				extra={'task': task_log},
 			)
-			data = await self.ministries_handler.scrape_and_package_ministry_services_data(  # noqa: E501
+			services_scraped_identifier = await self.ministries_handler.scrape_and_package_ministry_services_data(  # noqa: E501
 				service_task=task.payload,
 				task_log=task_log,
 				scrape_client=self.scrape_client,
@@ -268,17 +324,33 @@ class Executor:
 			return TaskResult(
 				task=task,
 				success=True,
-				discovered_data=data,
+				discovered_data=services_scraped_identifier,
 			)
 		elif (
 			task.operation
 			== TaskOperation.MINISTRIES_SERVICES_PROCESS
 		):
-			# TODO: Implement processing
-			# logic for service page data
+			logger.info(
+				'[EXECUTOR]\n'
+				'[TASK INFO]: Starting ministries services '
+				'process task.',
+				extra={'task': task_log},
+			)
+			(
+				services_processed_identifier,
+				service_entries_list,
+			) = await self.ministries_handler.process_service_task_list(  # noqa: E501
+				service_task_list=task.payload,
+				task_log=task_log,
+				task=task,
+			)
+
+			# TODO: Push processed service data to services
+			# handler for further processing and structuring
 			return TaskResult(
 				task=task,
-				success=False,
+				success=True,
+				discovered_data=services_processed_identifier,
 			)
 		# Raise error if operation is not recognised
 		raise ExecutorProcessFailure(
