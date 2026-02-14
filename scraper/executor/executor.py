@@ -42,11 +42,10 @@ class Executor:
 	for executing scheduled tasks.
 	"""
 
-	async def __init__(self) -> None:
+	def __init__(self) -> None:
 		# Scrape client for managing browser
 		# interactions
 		self.scrape_client = ScrapeClient()
-		await self.scrape_client.init_browser()
 
 		# Handlers for different scraping scopes
 		self.faq_handler = FAQHandler()
@@ -74,6 +73,24 @@ class Executor:
 				self._finalisation_scope
 			),
 		}
+
+	@classmethod
+	async def create(cls) -> 'Executor':
+		"""
+		Class method to create an instance of the Executor
+		with any necessary asynchronous initialization.
+		"""
+		executor = cls()
+		await executor.initialise()
+		return executor
+
+	async def initialise(self) -> None:
+		"""
+		Method to perform any asynchronous initialization
+		required for the executor.
+		"""
+		if not self.scrape_client._browser:
+			await self.scrape_client.init_browser()
 
 	# --- Handler state management methods --- #
 
