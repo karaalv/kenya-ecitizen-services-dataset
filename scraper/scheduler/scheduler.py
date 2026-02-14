@@ -440,6 +440,14 @@ class Scheduler:
 		next_ministry = self._ministries_page_scrape_queue[
 			0
 		]
+		logger.info(
+			f'[SCHEDULER]\n'
+			f'[PHASE INFO]: Scheduling scrape task for '
+			f'ministry page with ID '
+			f'{next_ministry.ministry_id}.'
+			f'{len(self._ministries_page_scrape_queue)} '
+			f'ministry pages left in queue.'
+		)
 		return MinistryTask(
 			scope=ScrapingPhase.MINISTRIES_PAGES,
 			operation=TaskOperation.MINISTRIES_PAGE_SCRAPE,
@@ -479,6 +487,8 @@ class Scheduler:
 				f'for ministry ID {next_ministry_id}, '
 				f'moving to processing tasks for the '
 				f'ministry.'
+				f'{len(self._ministries_services_queue)} '
+				f'ministries left in queue.'
 			)
 			return ServiceListTask(
 				scope=ScrapingPhase.MINISTRIES_SERVICES,
@@ -497,6 +507,8 @@ class Scheduler:
 				f'[PHASE INFO]: Scheduling next service to '
 				f'scrape for ministry ID '
 				f'{next_ministry_id}.'
+				f'{len(services_queue)} services left to '
+				f'scrape for this ministry.'
 			)
 			next_service = services_queue[0]
 			return ServiceTask(

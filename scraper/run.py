@@ -41,6 +41,7 @@ async def main():
 		total=None,
 		unit='task',
 		dynamic_ncols=True,
+		colour='blue',
 	)
 
 	# Run tasks in loop
