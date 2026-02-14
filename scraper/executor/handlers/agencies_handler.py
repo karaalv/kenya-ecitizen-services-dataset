@@ -126,7 +126,7 @@ class AgenciesHandler:
 		Method to load the handler state from a file.
 		"""
 		if not does_file_exist(self.state_file):
-			logger.info(
+			logger.debug(
 				f'[{self.handler_name}]\n'
 				f'State file not found at '
 				f'{self.state_file!r}, starting with '
@@ -145,7 +145,7 @@ class AgenciesHandler:
 		from a file.
 		"""
 		if not does_file_exist(self.metadata_state_file):
-			logger.info(
+			logger.debug(
 				f'[{self.handler_name}]\n'
 				f'Metadata state file not found at '
 				f'{self.metadata_state_file!r}, starting '
@@ -168,7 +168,7 @@ class AgenciesHandler:
 		"""
 		# If file already exists, read and return content
 		if does_file_exist(self.file):
-			logger.info(
+			logger.debug(
 				f'[{self.handler_name}]\n'
 				f'Agencies list file already exists at '
 				f'{self.file!r}, reading content.',
@@ -188,7 +188,7 @@ class AgenciesHandler:
 			content=agencies_list_html,
 		)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'Agencies list page scraped and '
 			f'saved to {self.file!r}.',
@@ -235,7 +235,7 @@ class AgenciesHandler:
 			task=task,
 		)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			'Agencies list page processed into structured '
 			'AgencyEntry data.',
@@ -299,7 +299,7 @@ class AgenciesHandler:
 			)
 
 		count = len(ministry_page_agency_data_list)
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Applied update to agencies '
 			f'state with {count} '
@@ -327,7 +327,7 @@ class AgenciesHandler:
 				entry.observed_service_count = service_count
 				self.agency_entries[agency_id] = entry
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Applied update to agencies '
 			f'state with service count by agency data for '
@@ -355,7 +355,7 @@ class AgenciesHandler:
 				agency_count_by_ministry[ministry_id] = 0
 			agency_count_by_ministry[ministry_id] += 1
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Computed agency count by '
 			f'ministry for {len(agency_count_by_ministry)} '
@@ -388,7 +388,7 @@ class AgenciesHandler:
 				] = 0
 			agency_count_by_department[department_id] += 1
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Computed agency count by '
 			f'department for  '
@@ -442,7 +442,7 @@ class AgenciesHandler:
 		# Produce insights
 		self.agencies_insights(agency_df)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'Agencies handler finalised. Processed data '
 			f'saved to {self.processed_data_dir!r} and '

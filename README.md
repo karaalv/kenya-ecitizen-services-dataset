@@ -27,7 +27,7 @@
 ## Data Freshness and Coverage
 
 <!-- TODO: Finish this section after the scrape -->
-- This dataset represents a snapshot of the eCitizen platform. The scrape was performed on `date`, and there are currently no guarantees of ongoing updates.
+- This dataset represents a snapshot of the eCitizen platform. The scrape was performed on `14 February 2026`, and there are currently no guarantees of ongoing updates.
 - The eCitizen platform reports hosting over 22,000 government services. This scrape captured approximately `number` services.
   <!-- TODO: Finish this bit with a clear explanation of coverage limitations -->
 

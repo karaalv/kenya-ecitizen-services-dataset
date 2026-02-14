@@ -80,7 +80,7 @@ class ServicesHandler:
 		Method to load the handler state from a file.
 		"""
 		if not does_file_exist(self.state_file):
-			logger.info(
+			logger.debug(
 				f'[{self.handler_name}]\n'
 				f'State file not found at '
 				f'{self.state_file!r}, starting with '
@@ -110,7 +110,7 @@ class ServicesHandler:
 				service_entry.service_id
 			] = service_entry
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Applied update to services '
 			f'state with {len(service_entry_list)} '
@@ -138,7 +138,7 @@ class ServicesHandler:
 				service_count_by_agency[agency_id] = 0
 			service_count_by_agency[agency_id] += 1
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Computed service count by '
 			f'agency for {len(service_count_by_agency)} '
@@ -171,7 +171,7 @@ class ServicesHandler:
 				] = 0
 			service_count_by_department[department_id] += 1
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Computed service count by '
 			f'department for  '
@@ -200,7 +200,7 @@ class ServicesHandler:
 				service_count_by_ministry[ministry_id] = 0
 			service_count_by_ministry[ministry_id] += 1
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Computed service count by '
 			f'ministry for '
@@ -259,7 +259,7 @@ class ServicesHandler:
 		# Produce insights
 		self.services_insights(service_df)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'Services handler finalised. Processed data '
 			f'saved to {self.processed_data_dir!r} and '

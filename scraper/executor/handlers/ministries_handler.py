@@ -125,7 +125,7 @@ class MinistriesHandler:
 		Method to load the handler state from a file.
 		"""
 		if not does_file_exist(self.state_file):
-			logger.info(
+			logger.debug(
 				f'[{self.handler_name}]\n'
 				f'State file not found at, '
 				f'{self.state_file!r} starting with '
@@ -187,7 +187,7 @@ class MinistriesHandler:
 		"""
 		# If file already exists, read and return content
 		if does_file_exist(self.file):
-			logger.info(
+			logger.debug(
 				f'[{self.handler_name}]\n'
 				f'Ministries list file already exists at '
 				f'{self.file!r}, reading content.',
@@ -205,7 +205,7 @@ class MinistriesHandler:
 			path=self.file,
 			content=ministries_list_html,
 		)
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'Ministries list page scraped and '
 			f'saved to {self.file!r}.',
@@ -242,7 +242,7 @@ class MinistriesHandler:
 		) and does_file_exist(
 			ministry_departments_agencies_file
 		):
-			logger.info(
+			logger.debug(
 				f'[{self.handler_name}]\n'
 				f'Ministry page files already exist for '
 				f'{ministry_id} at {ministry_overview_file!r} '  # noqa: E501
@@ -300,7 +300,7 @@ class MinistriesHandler:
 			path=ministry_departments_agencies_file,
 			content=ministry_page_data.departments_and_agencies,
 		)
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'Ministry page scraped for {ministry_id} and '
 			f'saved to {ministry_overview_file!r} and '
@@ -334,7 +334,7 @@ class MinistriesHandler:
 		# If file already exists,
 		# read and return content
 		if does_file_exist(services_file):
-			logger.info(
+			logger.debug(
 				f'[{self.handler_name}]\n'
 				f'Ministry services file already exists '
 				f'for {ministry_id} under department '
@@ -355,7 +355,7 @@ class MinistriesHandler:
 			content=services_html,
 		)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'Ministry services page scraped for '
 			f'{ministry_id} under department {department_id} '  # noqa: E501
@@ -432,7 +432,7 @@ class MinistriesHandler:
 			)
 		)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'Ministries list data processed for '
 			f'{len(ministry_entries)} ministries.',
@@ -535,7 +535,7 @@ class MinistriesHandler:
 			)
 		)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'Ministry page data processed for ministry '
 			f'{ministry_id}.',
@@ -720,7 +720,7 @@ class MinistriesHandler:
 				agency_id=service_task.agency_id,
 			)
 		)
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'Ministry services data processed for '
 			f'{len(service_entries)} services under '
@@ -868,7 +868,7 @@ class MinistriesHandler:
 			)
 		)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'Service task list processed for ministry '
 			f'{processing_ministry_id} '
@@ -977,7 +977,7 @@ class MinistriesHandler:
 				task=task,
 			)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'Batch applied ministry page overview data '
 			f'for {len(ministry_page_overview_results)} '
@@ -1010,7 +1010,7 @@ class MinistriesHandler:
 					ministry_entry
 				)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Applied update to ministries '
 			f'state with agency count for '
@@ -1044,7 +1044,7 @@ class MinistriesHandler:
 					ministry_entry
 				)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Applied update to ministries '
 			f'state with service count for '
@@ -1078,7 +1078,7 @@ class MinistriesHandler:
 					ministry_entry
 				)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Applied update to ministries '
 			f'state with department count for '
@@ -1131,7 +1131,7 @@ class MinistriesHandler:
 		# Produce insights
 		self.ministries_insights(ministry_df)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'Ministry handler finalised. Processed data '
 			f'saved to {self.processed_data_dir!r} and '
