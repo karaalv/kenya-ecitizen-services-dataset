@@ -1,4 +1,4 @@
-# Kenyan eCitizen Services Dataset – Methodology
+# Kenya eCitizen Services Dataset – Methodology
 
 ## 1. Overview
 

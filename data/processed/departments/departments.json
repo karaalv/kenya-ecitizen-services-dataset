@@ -1,0 +1,434 @@
+[
+  {
+    "department_id":"76081e714958",
+    "ministry_id":"dee46e0227db",
+    "department_name":"Commission on Administrative Justice",
+    "observed_agency_count":1,
+    "observed_service_count":1.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/commission-on-administrative-justice?department=commission-on-administrative-justice-commission-on-administrative-justice"
+  },
+  {
+    "department_id":"6dafe05f5e3c",
+    "ministry_id":"7a55ca42d67f",
+    "department_name":"Executive Office Of The President",
+    "observed_agency_count":1,
+    "observed_service_count":3.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/executive-office-of-the-president?department=executive-office-of-the-president-executive-office-of-the-president"
+  },
+  {
+    "department_id":"c0f9e21acd1b",
+    "ministry_id":"84b249e08c14",
+    "department_name":"State Department For Agriculture",
+    "observed_agency_count":23,
+    "observed_service_count":514.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-agriculture-and-livestock-development?department=state-department-for-agriculture"
+  },
+  {
+    "department_id":"d21befb59527",
+    "ministry_id":"84b249e08c14",
+    "department_name":"State Department For Livestock Development",
+    "observed_agency_count":8,
+    "observed_service_count":63.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-agriculture-and-livestock-development?department=state-department-for-livestock-development"
+  },
+  {
+    "department_id":"8ed5430ad43f",
+    "ministry_id":"5ecbeaab9e41",
+    "department_name":"State Department For Cooperatives",
+    "observed_agency_count":3,
+    "observed_service_count":15.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-cooperatives-and-micro-small-and-medium-enterprises-msme-development?department=state-department-for-cooperatives"
+  },
+  {
+    "department_id":"d290644c716c",
+    "ministry_id":"5ecbeaab9e41",
+    "department_name":"State Department For Micro, Small Enterprises (MSME) Development",
+    "observed_agency_count":4,
+    "observed_service_count":47.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-cooperatives-and-micro-small-and-medium-enterprises-msme-development?department=state-department-for-micro-small-enterprises-msme-development"
+  },
+  {
+    "department_id":"f1fad849a43e",
+    "ministry_id":"bfc0ad498f1a",
+    "department_name":"Ministry of Defence",
+    "observed_agency_count":4,
+    "observed_service_count":20.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-defence-ministry-of-defence-ministry-of-defence?department=ministry-of-defence"
+  },
+  {
+    "department_id":"7c04794adf38",
+    "ministry_id":"7e71e6830cb0",
+    "department_name":"State Department For The Asals and Regional Development",
+    "observed_agency_count":3,
+    "observed_service_count":8.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-east-african-community-eac-the-asals-regional-development?department=state-department-for-the-asals-regional-development"
+  },
+  {
+    "department_id":"84b2f6075917",
+    "ministry_id":"7e71e6830cb0",
+    "department_name":"The State Department for East African Community",
+    "observed_agency_count":1,
+    "observed_service_count":3.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-east-african-community-eac-the-asals-regional-development?department=the-state-department-for-east-african-community"
+  },
+  {
+    "department_id":"0794c8995a87",
+    "ministry_id":"21513791e78a",
+    "department_name":"State Department For Basic Education",
+    "observed_agency_count":9,
+    "observed_service_count":56.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-education?department=state-department-for-basic-education"
+  },
+  {
+    "department_id":"5f7ffbe4ce0e",
+    "ministry_id":"21513791e78a",
+    "department_name":"State Department For Higher Education And Research",
+    "observed_agency_count":44,
+    "observed_service_count":568.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-education?department=state-department-for-higher-education-and-research"
+  },
+  {
+    "department_id":"e5822909cb0a",
+    "ministry_id":"21513791e78a",
+    "department_name":"State Department For Technical And Vocational Training",
+    "observed_agency_count":7,
+    "observed_service_count":65.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-education?department=state-department-for-technical-and-vocational-training"
+  },
+  {
+    "department_id":"d6ed7712dede",
+    "ministry_id":"8d57dacf896b",
+    "department_name":"State Department For Energy",
+    "observed_agency_count":3,
+    "observed_service_count":30.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-energy-and-petroleum?department=state-department-for-energy"
+  },
+  {
+    "department_id":"ac6173457be4",
+    "ministry_id":"8d57dacf896b",
+    "department_name":"State Department For Petroleum",
+    "observed_agency_count":1,
+    "observed_service_count":22.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-energy-and-petroleum?department=state-department-for-petroleum"
+  },
+  {
+    "department_id":"af2038bde7d3",
+    "ministry_id":"8bfda0c9fd5d",
+    "department_name":"State Department For Environment And Climate Change",
+    "observed_agency_count":4,
+    "observed_service_count":121.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-environment-climate-change-and-forestry?department=state-department-for-environment-and-climate-change"
+  },
+  {
+    "department_id":"225ee7967934",
+    "ministry_id":"8bfda0c9fd5d",
+    "department_name":"State Department For Forestry",
+    "observed_agency_count":2,
+    "observed_service_count":359.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-environment-climate-change-and-forestry?department=state-department-for-forestry"
+  },
+  {
+    "department_id":"cf956242d03c",
+    "ministry_id":"0807579f15e9",
+    "department_name":"Ministry of Foreign and Diaspora Affairs",
+    "observed_agency_count":2,
+    "observed_service_count":23.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-foreign-and-diaspora-affairs?department=state-department-for-diaspora-affairs"
+  },
+  {
+    "department_id":"a039d66a2115",
+    "ministry_id":"94e331142388",
+    "department_name":"State Department for Culture, The Arts And Heritage",
+    "observed_agency_count":6,
+    "observed_service_count":15.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-gender-culture-the-arts-heritage?department=state-department-for-culture-and-heritage"
+  },
+  {
+    "department_id":"d64c9d49f090",
+    "ministry_id":"94e331142388",
+    "department_name":"State Department For Gender And Affirmative Action",
+    "observed_agency_count":3,
+    "observed_service_count":11.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-gender-culture-the-arts-heritage?department=state-department-for-gender-and-affirmative-action"
+  },
+  {
+    "department_id":"20f496252d18",
+    "ministry_id":"6c0348f40cf6",
+    "department_name":"State Department For Medical Services",
+    "observed_agency_count":10,
+    "observed_service_count":139.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-health?department=state-department-for-medical-services"
+  },
+  {
+    "department_id":"2754ce756186",
+    "ministry_id":"6c0348f40cf6",
+    "department_name":"State Department For Public Health And Professional Standards",
+    "observed_agency_count":14,
+    "observed_service_count":237.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-health?department=state-department-for-public-health-and-professional-standards"
+  },
+  {
+    "department_id":"d2c6738c9a69",
+    "ministry_id":"6c3eb781924c",
+    "department_name":"State Department For Broadcasting And Telecommunications",
+    "observed_agency_count":8,
+    "observed_service_count":104.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-information-communications-and-the-digital-economy?department=state-department-for-broadcasting-and-telecommunications"
+  },
+  {
+    "department_id":"f9d45d9db843",
+    "ministry_id":"6c3eb781924c",
+    "department_name":"State Department For Information Communication Technology (ICT) And Digital Economy",
+    "observed_agency_count":2,
+    "observed_service_count":7.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-information-communications-and-the-digital-economy?department=state-department-for-information-communication-technology-ict-and-digital-economy"
+  },
+  {
+    "department_id":"77492d60d8f8",
+    "ministry_id":"3496434dc65d",
+    "department_name":"State Department for Correctional Services",
+    "observed_agency_count":1,
+    "observed_service_count":1.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-interior-and-national-administration?department=state-department-for-correctional-services"
+  },
+  {
+    "department_id":"5333eb50fa3f",
+    "ministry_id":"3496434dc65d",
+    "department_name":"State Department For Immigration and Citizen Services",
+    "observed_agency_count":4,
+    "observed_service_count":56.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-interior-and-national-administration?department=state-department-for-immigration-citizen-services"
+  },
+  {
+    "department_id":"95a887ec04b5",
+    "ministry_id":"3496434dc65d",
+    "department_name":"State Department For Internal Security And National Administration",
+    "observed_agency_count":10,
+    "observed_service_count":84.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-interior-and-national-administration?department=state-department-for-internal-security-and-national-administration"
+  },
+  {
+    "department_id":"b6b08787a8b4",
+    "ministry_id":"0aac37ecd8a7",
+    "department_name":"State Department For Industry",
+    "observed_agency_count":5,
+    "observed_service_count":87.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-investments-trade-and-industry?department=state-department-for-industry"
+  },
+  {
+    "department_id":"689268215fa5",
+    "ministry_id":"0aac37ecd8a7",
+    "department_name":"State Department For Investment and Promotion",
+    "observed_agency_count":5,
+    "observed_service_count":16.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-investments-trade-and-industry?department=state-department-for-investment-and-promotion"
+  },
+  {
+    "department_id":"1ca94802e4d8",
+    "ministry_id":"0aac37ecd8a7",
+    "department_name":"State Department for Trade",
+    "observed_agency_count":1,
+    "observed_service_count":4.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-investments-trade-and-industry?department=state-department-for-trade"
+  },
+  {
+    "department_id":"de112e2a3635",
+    "ministry_id":"6e9afa525641",
+    "department_name":"State Department For Labour And Skills Development",
+    "observed_agency_count":4,
+    "observed_service_count":28.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-labour-and-social-protection?department=state-department-for-labour-and-skills-development"
+  },
+  {
+    "department_id":"6bb582ed159f",
+    "ministry_id":"6e9afa525641",
+    "department_name":"State Department For Social Protection And Senior Citizen Affairs",
+    "observed_agency_count":2,
+    "observed_service_count":4.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-labour-and-social-protection?department=state-department-for-social-protection-and-senior-citizen-affairs"
+  },
+  {
+    "department_id":"493684d848a9",
+    "ministry_id":"6ae2ec611139",
+    "department_name":"State Department For Housing And Urban Development",
+    "observed_agency_count":0,
+    "observed_service_count":null,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-lands-public-works-housing-and-urban-development"
+  },
+  {
+    "department_id":"7059df72f8b9",
+    "ministry_id":"6ae2ec611139",
+    "department_name":"State Department For Lands And Physical Planning",
+    "observed_agency_count":1,
+    "observed_service_count":11.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-lands-public-works-housing-and-urban-development?department=state-department-for-lands-and-physical-planning"
+  },
+  {
+    "department_id":"c5b331ba8869",
+    "ministry_id":"6ae2ec611139",
+    "department_name":"State Department For Public Works",
+    "observed_agency_count":2,
+    "observed_service_count":5.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-lands-public-works-housing-and-urban-development?department=state-department-for-public-works"
+  },
+  {
+    "department_id":"c68f385cf480",
+    "ministry_id":"47da91e864d6",
+    "department_name":"State Department For Mining",
+    "observed_agency_count":0,
+    "observed_service_count":null,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-mining-blue-economy-and-maritime-affairs"
+  },
+  {
+    "department_id":"25bbcb736c04",
+    "ministry_id":"47da91e864d6",
+    "department_name":"State Department For Shipping And Maritime Affairs",
+    "observed_agency_count":2,
+    "observed_service_count":68.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-mining-blue-economy-and-maritime-affairs?department=state-department-for-shipping-and-maritime-affairs"
+  },
+  {
+    "department_id":"0f6538a4b7fd",
+    "ministry_id":"47da91e864d6",
+    "department_name":"STATE DEPARTMENT FOR THE BLUE ECONOMY AND FISHERIES",
+    "observed_agency_count":3,
+    "observed_service_count":34.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-mining-blue-economy-and-maritime-affairs?department=state-department-for-the-blue-economy-and-fisheries"
+  },
+  {
+    "department_id":"6f59960e02c7",
+    "ministry_id":"01d256f861be",
+    "department_name":"State Department For Public Service",
+    "observed_agency_count":6,
+    "observed_service_count":231.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-public-service-gender-and-affirmative-action?department=state-department-for-public-service"
+  },
+  {
+    "department_id":"9c53fca043fe",
+    "ministry_id":"de273f239829",
+    "department_name":"State Department For Roads",
+    "observed_agency_count":6,
+    "observed_service_count":46.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-roads-and-transport?department=state-department-for-roads"
+  },
+  {
+    "department_id":"f6f940948531",
+    "ministry_id":"de273f239829",
+    "department_name":"State Department For Transport",
+    "observed_agency_count":7,
+    "observed_service_count":1150.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-roads-and-transport?department=state-department-for-transport"
+  },
+  {
+    "department_id":"57a5e93f3720",
+    "ministry_id":"67e018216ddb",
+    "department_name":"State Department for Tourism",
+    "observed_agency_count":7,
+    "observed_service_count":216.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-tourism-wildlife-and-heritage?department=state-department-for-tourism-and-wildlife"
+  },
+  {
+    "department_id":"630e6b6d16dc",
+    "ministry_id":"67e018216ddb",
+    "department_name":"State Department for Wildlife",
+    "observed_agency_count":2,
+    "observed_service_count":14.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-tourism-wildlife-and-heritage?department=state-department-for-wildlife"
+  },
+  {
+    "department_id":"a5fdd013b018",
+    "ministry_id":"99fc3256de0e",
+    "department_name":"State Department For Irrigation",
+    "observed_agency_count":3,
+    "observed_service_count":39.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-water-sanitation-and-irrigation?department=state-department-for-irrigation"
+  },
+  {
+    "department_id":"8f08039e45ee",
+    "ministry_id":"99fc3256de0e",
+    "department_name":"State Department For Water Sanitation",
+    "observed_agency_count":9,
+    "observed_service_count":32.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-water-sanitation-and-irrigation?department=state-department-for-water-sanitation"
+  },
+  {
+    "department_id":"45a7804cb72b",
+    "ministry_id":"c8ac65a37ffd",
+    "department_name":"State Department For Sports And The Arts",
+    "observed_agency_count":6,
+    "observed_service_count":63.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-youth-affairs-sports-and-the-arts?department=state-department-for-sports-and-the-arts"
+  },
+  {
+    "department_id":"2a313287a99d",
+    "ministry_id":"c8ac65a37ffd",
+    "department_name":"State Department For Youth Affairs",
+    "observed_agency_count":2,
+    "observed_service_count":11.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/ministry-of-youth-affairs-sports-and-the-arts?department=state-department-for-youth-affairs"
+  },
+  {
+    "department_id":"068941e392dc",
+    "ministry_id":"720783b02f35",
+    "department_name":"Parliament of Kenya",
+    "observed_agency_count":2,
+    "observed_service_count":40.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/parliament-of-kenya?department=parliament-of-kenya-parliament-of-kenya"
+  },
+  {
+    "department_id":"a5bcc6c28f05",
+    "ministry_id":"333d0af8d562",
+    "department_name":"The Judiciary",
+    "observed_agency_count":1,
+    "observed_service_count":87.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/the-judiciary?department=the-judiciary-the-judiciary"
+  },
+  {
+    "department_id":"d43ecbd51bcf",
+    "ministry_id":"16190641f2b5",
+    "department_name":"State Department For Economic Planning",
+    "observed_agency_count":2,
+    "observed_service_count":56.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/the-national-treasury-and-economic-planning?department=state-department-for-economic-planning"
+  },
+  {
+    "department_id":"8cfbbfef1ac2",
+    "ministry_id":"16190641f2b5",
+    "department_name":"State Department For Planning",
+    "observed_agency_count":2,
+    "observed_service_count":23.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/the-national-treasury-and-economic-planning?department=state-department-for-planning"
+  },
+  {
+    "department_id":"4c3267030630",
+    "ministry_id":"16190641f2b5",
+    "department_name":"The National Treasury",
+    "observed_agency_count":16,
+    "observed_service_count":398.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/the-national-treasury-and-economic-planning?department=the-national-treasury"
+  },
+  {
+    "department_id":"266821e915c4",
+    "ministry_id":"16190641f2b5",
+    "department_name":"The State Department For Treasury",
+    "observed_agency_count":2,
+    "observed_service_count":180.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/the-national-treasury-and-economic-planning?department=the-state-department-for-treasury"
+  },
+  {
+    "department_id":"b0e27cbbbacf",
+    "ministry_id":"b3491d8f52f4",
+    "department_name":"Registrar General's Department",
+    "observed_agency_count":3,
+    "observed_service_count":26.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/the-state-law-office?department=registrar-generals-department"
+  },
+  {
+    "department_id":"d84a170a9cc9",
+    "ministry_id":"b3491d8f52f4",
+    "department_name":"The State Law Office",
+    "observed_agency_count":7,
+    "observed_service_count":48.0,
+    "ministry_departments_url":"https:\/\/ecitizen.go.ke\/en\/ministries\/the-state-law-office?department=the-state-law-office-the-state-law-office"
+  }
+]

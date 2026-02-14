@@ -5,6 +5,7 @@ schedules tasks, and executes handlers to perform
 the scraping and insights generation processes.
 """
 
+import asyncio
 import logging
 
 from tqdm import tqdm
@@ -40,9 +41,10 @@ async def main():
 		total=None,
 		unit='task',
 		dynamic_ncols=True,
+		colour='blue',
 	)
 
-	# Rum tasks in loop
+	# Run tasks in loop
 	try:
 		with logging_redirect_tqdm():
 			while True:
@@ -67,3 +69,7 @@ async def main():
 	finally:
 		progress_bar.close()
 		await executor.close()
+
+
+if __name__ == '__main__':
+	asyncio.run(main())

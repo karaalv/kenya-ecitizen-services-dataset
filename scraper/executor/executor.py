@@ -472,6 +472,12 @@ class Executor:
 
 			task_result = await handler(task)
 
+			logger.info(
+				'[EXECUTOR]\n'
+				'[TASK INFO]: Task executed successfully.',
+				extra={'task': get_task_log(task)},
+			)
+
 			# Save handler states after task
 			# execution
 			self.save_handlers_state()

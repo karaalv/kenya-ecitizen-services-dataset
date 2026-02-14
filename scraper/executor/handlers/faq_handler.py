@@ -88,7 +88,7 @@ class FAQHandler:
 		Method to load the handler state from a file.
 		"""
 		if not does_file_exist(self.state_file):
-			logger.info(
+			logger.debug(
 				f'[{self.handler_name}]\n'
 				f'FAQ handler state file not found at '
 				f'{self.state_file!r}, starting with '
@@ -111,7 +111,7 @@ class FAQHandler:
 		"""
 		# If file already exists, read and return content
 		if does_file_exist(self.file):
-			logger.info(
+			logger.debug(
 				f'[{self.handler_name}]\n'
 				f'FAQ file already exists at '
 				f'{self.file!r}, reading content.',
@@ -131,7 +131,7 @@ class FAQHandler:
 			content=faq_html,
 		)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'FAQ page scraped and saved to {self.file!r}.',
 			extra={'task': task_log},
@@ -171,7 +171,7 @@ class FAQHandler:
 			task=task,
 		)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'FAQ page processed into'
 			f' {len(self.faq_entities)} entries.',
@@ -218,7 +218,7 @@ class FAQHandler:
 		# Produce insights
 		self.faqs_insights(faq_df)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'FAQ handler finalised. Processed data saved '
 			f'to {self.processed_data_dir!r} and insights '

@@ -79,7 +79,7 @@ class DepartmentsHandler:
 		Method to load the handler state from a file.
 		"""
 		if not does_file_exist(self.state_file):
-			logger.info(
+			logger.debug(
 				f'[{self.handler_name}]\n'
 				f'State file not found at '
 				f'{self.state_file!r}, starting with empty '
@@ -109,7 +109,7 @@ class DepartmentsHandler:
 				department_entry.department_id
 			] = department_entry
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Applied update to departments '
 			f'state with {len(department_entry_list)} '
@@ -142,7 +142,7 @@ class DepartmentsHandler:
 					department_entry
 				)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Applied update to departments '
 			f'state with agency count for '
@@ -176,7 +176,7 @@ class DepartmentsHandler:
 					department_entry
 				)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Applied update to departments '
 			f'state with service count for '
@@ -212,7 +212,7 @@ class DepartmentsHandler:
 				] = 0
 			department_count_by_ministry[ministry_id] += 1
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'[TASK INFO]: Computed department count by '
 			f'ministry for  '
@@ -264,7 +264,7 @@ class DepartmentsHandler:
 		# Produce insights
 		self.departments_insights(department_df)
 
-		logger.info(
+		logger.debug(
 			f'[{self.handler_name}]\n'
 			f'Departments handler finalised. Processed '
 			f'data saved to {self.processed_data_dir!r} '
