@@ -12,8 +12,8 @@ from scraper.exceptions.executor import (
 	ExecutorProcessingFailure,
 )
 from scraper.processing.recipes.ministries import (
-	ministries_departments_agencies_processing_recipe,
-	ministries_overview_processing_recipe,
+	ministry_departments_agencies_processing_recipe,
+	ministry_overview_processing_recipe,
 	ministry_service_processing_recipe,
 )
 from scraper.processing.recipes.ministries_list import (
@@ -324,12 +324,12 @@ class MinistriesHandler:
 		# Process ministry overview and departments/agencies
 		# page data
 		ministry_overview_processed_data = (
-			ministries_overview_processing_recipe(
+			ministry_overview_processing_recipe(
 				html=ministry_page_data.overview,
 			)
 		)
 		ministry_departments_agencies_processed_data = (  # noqa: E501
-			ministries_departments_agencies_processing_recipe(
+			ministry_departments_agencies_processing_recipe(
 				html=ministry_page_data.departments_and_agencies,
 				ministry_id=ministry_id,
 				ministry_url=ministry_url,

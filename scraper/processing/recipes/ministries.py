@@ -22,12 +22,12 @@ from scraper.utils.normalise import (
 )
 
 
-def ministries_overview_processing_recipe(
+def ministry_overview_processing_recipe(
 	html: str,
 ) -> MinistryPageProcessedData:
 	"""
 	Recipe to process the raw HTML content of
-	the ministries overview page.
+	the ministry overview page.
 	"""
 	soup = BeautifulSoup(html, 'lxml')
 
@@ -78,7 +78,7 @@ def ministries_overview_processing_recipe(
 	)
 
 
-# Helper functions to process the ministries departments
+# Helper functions to process the ministry departments
 # and agencies page
 def _dept_name(department_block) -> str:
 	"""
@@ -108,11 +108,10 @@ def _dept_url(
 
 	if not dq:
 		return ministry_url
-
 	return normalise_url(f'{ministry_url}?department={dq}')
 
 
-def ministries_departments_agencies_processing_recipe(
+def ministry_departments_agencies_processing_recipe(
 	html: str,
 	ministry_id: str,
 	ministry_url: str,
@@ -122,7 +121,7 @@ def ministries_departments_agencies_processing_recipe(
 ]:
 	"""
 	Recipe to process the raw HTML content of
-	the ministries departments and agencies page.
+	the ministry departments and agencies page.
 
 	Returns a tuple of two dictionaries:
 	- [0]: dict[department_id, DepartmentEntry]

@@ -93,24 +93,26 @@ def normalise_url(
 	"""
 	Resolve relative URLs and normalise them.
 
-	- Resolves against base_url
+	- Only resolves against base_url if URL has no scheme
 	- Lowercases scheme + host
-	- Removes fragments
+	- Removes fragment
 	- Percent-encodes safely (UTF-8)
+	- Avoids double-encoding via quote(unquote(...))
 	"""
 
 	url = url.strip()
 
-	# Resolve relative URLs
-	url = urljoin(base_url, url)
-
 	parsed = urlparse(url)
+
+	# Resolve only if relative or scheme-less
+	if not parsed.scheme:
+		url = urljoin(base_url, url)
+		parsed = urlparse(url)
 
 	scheme = parsed.scheme.lower()
 	netloc = parsed.netloc.lower()
 
 	path = quote(unquote(parsed.path), safe='/')
-
 	query = quote(unquote(parsed.query), safe='=&')
 
 	return urlunparse(
