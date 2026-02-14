@@ -75,12 +75,26 @@ class Executor:
 			),
 		}
 
+	# --- Handler state management methods --- #
+
+	def save_handlers_state(self) -> None:
+		"""
+		Method to save the state of all handlers.
+		"""
+		self.faq_handler.save_state()
+		self.agencies_handler.save_state()
+		self.ministries_handler.save_state()
+		self.departments_handler.save_state()
+		self.services_handler.save_state()
+
 	async def close(self) -> None:
 		"""
 		Method to close any resources held by the executor,
 		such as the scrape client's browser instance.
 		"""
 		await self.scrape_client.close_browser()
+
+	# --- Scope-specific task execution methods --- #
 
 	async def _faq_scope(
 		self, task: SchedulerTask
@@ -285,10 +299,20 @@ class Executor:
 				task_log=task_log,
 				task=task,
 			)
-			# TODO: Push department_entries to departments
+			# Push department_entries to departments
 			# handler for processing
-			# TODO: Push ministry_page_agency_data to
+			self.departments_handler.apply_department_entry_list(
+				department_entry_list=department_entry_list,
+				task_log=task_log,
+				task=task,
+			)
+			# Push ministry_page_agency_data to
 			# agencies handler for processing
+			self.agencies_handler.apply_ministry_page_agency_data_list(
+				ministry_page_agency_data_list=ministry_page_agency_data_list,
+				task_log=task_log,
+				task=task,
+			)
 			return TaskResult(
 				task=task,
 				success=True,
@@ -321,6 +345,7 @@ class Executor:
 				task_log=task_log,
 				scrape_client=self.scrape_client,
 			)
+
 			return TaskResult(
 				task=task,
 				success=True,
@@ -345,8 +370,13 @@ class Executor:
 				task=task,
 			)
 
-			# TODO: Push processed service data to services
+			# Push processed service data to services
 			# handler for further processing and structuring
+			self.services_handler.apply_service_entry_list(
+				service_entry_list=service_entries_list,
+				task_log=task_log,
+				task=task,
+			)
 			return TaskResult(
 				task=task,
 				success=True,
@@ -367,12 +397,40 @@ class Executor:
 		Perform finalisation operations after
 		all scraping and processing
 		"""
-		# TODO: Implement any finalisation logic needed
-		# such as aggregating results, closing resources
+		# Finalisation
+		logger.info(
+			'[EXECUTOR]\n'
+			'[TASK INFO]: Starting finalisation task.',
+			extra={'task': get_task_log(task)},
+		)
+
+		# Apply any count-based updates to handlers'
+		# states
+		self._apply_counts_to_handlers(
+			task_log=get_task_log(task),
+			task=task,
+		)
+
+		# Perform handler specific finalisation steps,
+		# such as rendering insights reports and saving
+		# final data to files
+		self.faq_handler.finalise()
+		self.agencies_handler.finalise()
+		self.departments_handler.finalise()
+		self.ministries_handler.finalise()
+		self.services_handler.finalise()
+
+		logger.info(
+			'[EXECUTOR]\n'
+			'[TASK INFO]: Finalisation task completed.',
+			extra={'task': get_task_log(task)},
+		)
 		return TaskResult(
 			task=task,
 			success=True,
 		)
+
+	# --- Main task execution method --- #
 
 	async def execute_task(
 		self,
@@ -394,9 +452,16 @@ class Executor:
 					task=task,
 					task_log=get_task_log(task),
 				)
-			return await handler(task)
+
+			task_result = await handler(task)
+
+			# Save handler states after task
+			# execution
+			self.save_handlers_state()
+			return task_result
 		except Exception as e:
-			# Log the error and return a failed TaskResult
+			# Log the error and return a failed
+			# TaskResult
 			logger.error(
 				f'Error executing task: {e!r}',
 				extra={'task': get_task_log(task)},
@@ -406,3 +471,90 @@ class Executor:
 				success=False,
 				error_message=str(e),
 			)
+
+	# --- Finalisation methods --- #
+
+	def _apply_counts_to_handlers(
+		self,
+		task_log: str,
+		task: SchedulerTask,
+	) -> None:
+		"""
+		Method to apply any count-based updates to the
+		handlers' states after all scraping and processing
+		is done.
+		"""
+		# Agency handler
+		service_count_by_agency = (  # noqa: E501
+			self.services_handler.get_service_count_by_agency(
+				task_log=task_log,
+				task=task,
+			)
+		)
+		self.agencies_handler.apply_service_count_by_agency(
+			service_count_by_agency=service_count_by_agency,
+			task_log=task_log,
+			task=task,
+		)
+
+		# Department handler
+		service_count_by_department = (  # noqa: E501
+			self.services_handler.get_service_count_by_department(
+				task_log=task_log,
+				task=task,
+			)
+		)
+		self.departments_handler.apply_service_count_by_department(
+			service_count_by_department=service_count_by_department,
+			task_log=task_log,
+			task=task,
+		)
+
+		agency_count_by_department = (  # noqa: E501
+			self.agencies_handler.get_agency_count_by_department(
+				task_log=task_log,
+				task=task,
+			)
+		)
+		self.departments_handler.apply_agency_count_by_department(
+			agency_count_by_department=agency_count_by_department,
+			task_log=task_log,
+			task=task,
+		)
+
+		# Ministries handler
+		service_count_by_ministry = (  # noqa: E501
+			self.services_handler.get_service_count_by_ministry(
+				task_log=task_log,
+				task=task,
+			)
+		)
+		self.ministries_handler.apply_service_count_by_ministry(
+			service_count_by_ministry=service_count_by_ministry,
+			task_log=task_log,
+			task=task,
+		)
+
+		agency_count_by_ministry = (  # noqa: E501
+			self.agencies_handler.get_agency_count_by_ministry(
+				task_log=task_log,
+				task=task,
+			)
+		)
+		self.ministries_handler.apply_agency_count_by_ministry(
+			agency_count_by_ministry=agency_count_by_ministry,
+			task_log=task_log,
+			task=task,
+		)
+
+		department_count_by_ministry = (  # noqa: E501
+			self.departments_handler.get_department_count_by_ministry(
+				task_log=task_log,
+				task=task,
+			)
+		)
+		self.ministries_handler.apply_department_count_by_ministry(
+			department_count_by_ministry=department_count_by_ministry,
+			task_log=task_log,
+			task=task,
+		)

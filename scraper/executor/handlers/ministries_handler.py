@@ -8,9 +8,12 @@ import asyncio
 import logging
 from pathlib import Path
 
+import pandas as pd
+
 from scraper.exceptions.executor import (
 	ExecutorProcessingFailure,
 )
+from scraper.insights.core import render_insights_report
 from scraper.processing.recipes.ministries import (
 	ministry_departments_agencies_processing_recipe,
 	ministry_overview_processing_recipe,
@@ -56,6 +59,12 @@ from scraper.utils.files import (
 	read_file,
 	write_file,
 )
+from scraper.utils.handlers import (
+	save_df,
+	state_to_df,
+	state_to_str,
+	str_to_state,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -68,16 +77,64 @@ class MinistriesHandler:
 
 	def __init__(self) -> None:
 		# Handler configuration
-		self.handler_name = 'MinistriesHandler'
+		self.handler_name = 'MINISTRIES HANDLER'
 		self.seed_url = SeedUrls.MINISTRIES_LIST_URL
 		self.file = (
 			Paths.RAW_DATA_DIR
 			/ 'ministries'
 			/ 'ministries_list.html'
 		)
+		self.state_file = (
+			Paths.TEMP_DIR / 'ministries_handler_state.json'
+		)
+
+		# Processed file locations
+		self.processed_data_dir = (
+			Paths.PROCESSED_DATA_DIR / 'ministries'
+		)
+
+		self.processed_data_json = (
+			self.processed_data_dir / 'ministries.json'
+		)
+		self.processed_data_csv = (
+			self.processed_data_dir / 'ministries.csv'
+		)
+
+		# Insights file location
+		self.insights_file = (
+			Paths.INSIGHTS_DIR / 'ministries.md'
+		)
 
 		# Entity state
-		self.ministry_entries: dict[str, MinistryEntry] = {}
+		self.ministry_entries: dict[str, MinistryEntry] = (
+			self._load_state()
+		)
+
+	def save_state(self) -> None:
+		"""
+		Method to save the handler state to a file.
+		"""
+		state_str = state_to_str(self.ministry_entries)
+		write_file(
+			path=self.state_file,
+			content=state_str,
+		)
+
+	def _load_state(self) -> dict[str, MinistryEntry]:
+		"""
+		Method to load the handler state from a file.
+		"""
+		if not does_file_exist(self.state_file):
+			logger.info(
+				f'[{self.handler_name}]\n'
+				f'State file not found at, '
+				f'{self.state_file!r} starting with '
+				'empty state.',
+			)
+			return {}
+
+		state_str = read_file(self.state_file)
+		return str_to_state(state_str, MinistryEntry)
 
 	# File builder methods for constructing file paths for
 	# ministries data based on ministry identifiers
@@ -131,6 +188,7 @@ class MinistriesHandler:
 		# If file already exists, read and return content
 		if does_file_exist(self.file):
 			logger.info(
+				f'[{self.handler_name}]\n'
 				f'Ministries list file already exists at '
 				f'{self.file!r}, reading content.',
 				extra={'task': task_log},
@@ -148,6 +206,7 @@ class MinistriesHandler:
 			content=ministries_list_html,
 		)
 		logger.info(
+			f'[{self.handler_name}]\n'
 			f'Ministries list page scraped and '
 			f'saved to {self.file!r}.',
 			extra={'task': task_log},
@@ -184,6 +243,7 @@ class MinistriesHandler:
 			ministry_departments_agencies_file
 		):
 			logger.info(
+				f'[{self.handler_name}]\n'
 				f'Ministry page files already exist for '
 				f'{ministry_id} at {ministry_overview_file!r} '  # noqa: E501
 				f'and {ministry_departments_agencies_file!r}, '  # noqa: E501
@@ -208,6 +268,7 @@ class MinistriesHandler:
 		)
 		if not ministry_entry:
 			logger.error(
+				f'[{self.handler_name}]\n'
 				f'Ministry entry not found in handler '
 				f'state for ministry_id {ministry_id} '
 				f' when scraping ministry page.',
@@ -240,6 +301,7 @@ class MinistriesHandler:
 			content=ministry_page_data.departments_and_agencies,
 		)
 		logger.info(
+			f'[{self.handler_name}]\n'
 			f'Ministry page scraped for {ministry_id} and '
 			f'saved to {ministry_overview_file!r} and '
 			f'{ministry_departments_agencies_file!r}.',
@@ -273,8 +335,9 @@ class MinistriesHandler:
 		# read and return content
 		if does_file_exist(services_file):
 			logger.info(
-				'Ministry services file already exists for '
-				f'{ministry_id} under department '
+				f'[{self.handler_name}]\n'
+				f'Ministry services file already exists '
+				f'for {ministry_id} under department '
 				f'{department_id} and agency {agency_id} '
 				f'at {services_file!r}, reading content.',
 				extra={'task': task_log},
@@ -293,7 +356,8 @@ class MinistriesHandler:
 		)
 
 		logger.info(
-			'Ministry services page scraped for '
+			f'[{self.handler_name}]\n'
+			f'Ministry services page scraped for '
 			f'{ministry_id} under department {department_id} '  # noqa: E501
 			f'and agency {agency_id}, saved to {services_file!r}.',  # noqa: E501
 			extra={'task': task_log},
@@ -344,6 +408,7 @@ class MinistriesHandler:
 		"""
 		if not does_file_exist(self.file):
 			logger.error(
+				f'[{self.handler_name}]\n'
 				f'Ministries list file does not exist at '
 				f'{self.file!r}, cannot process data.',
 				extra={'task': task_log},
@@ -368,6 +433,7 @@ class MinistriesHandler:
 		)
 
 		logger.info(
+			f'[{self.handler_name}]\n'
 			f'Ministries list data processed for '
 			f'{len(ministry_entries)} ministries.',
 			extra={'task': task_log},
@@ -414,6 +480,7 @@ class MinistriesHandler:
 			ministry_departments_agencies_file
 		):
 			logger.error(
+				f'[{self.handler_name}]\n'
 				f'Ministry page files do not exist for '
 				f'{ministry_id} at {ministry_overview_file!r} '  # noqa: E501
 				f'and {ministry_departments_agencies_file!r}, '  # noqa: E501
@@ -469,6 +536,7 @@ class MinistriesHandler:
 		)
 
 		logger.info(
+			f'[{self.handler_name}]\n'
 			f'Ministry page data processed for ministry '
 			f'{ministry_id}.',
 			extra={'task': task_log},
@@ -541,6 +609,7 @@ class MinistriesHandler:
 		for result in results_pure:
 			if isinstance(result, BaseException):
 				logger.error(
+					f'[{self.handler_name}]\n'
 					f'Error processing ministry page data: '
 					f'{result!r}',
 					extra={'task': task_log},
@@ -624,6 +693,7 @@ class MinistriesHandler:
 
 		if not does_file_exist(services_file):
 			logger.error(
+				f'[{self.handler_name}]\n'
 				f'Ministry services file does not exist '
 				f'for {service_task.ministry_id} under '
 				f'department {service_task.department_id} '
@@ -651,6 +721,7 @@ class MinistriesHandler:
 			)
 		)
 		logger.info(
+			f'[{self.handler_name}]\n'
 			f'Ministry services data processed for '
 			f'{len(service_entries)} services under '
 			f'ministry {service_task.ministry_id}, '
@@ -686,6 +757,7 @@ class MinistriesHandler:
 		)
 		if len(ministry_ids) != 1:
 			logger.error(
+				f'[{self.handler_name}]\n'
 				'Service task list contains tasks for '
 				f'multiple ministries: {ministry_ids}. '
 				'All tasks in a service task list should '
@@ -724,6 +796,7 @@ class MinistriesHandler:
 		for result in raw_results:
 			if isinstance(result, BaseException):
 				logger.error(
+					f'[{self.handler_name}]\n'
 					f'Error processing service task list: '
 					f'{result!r}',
 					extra={'task': task_log},
@@ -750,6 +823,7 @@ class MinistriesHandler:
 		)
 		if len(ministry_ids) != 1:
 			logger.error(
+				f'[{self.handler_name}]\n'
 				'Processed service entries belong to '
 				f'multiple ministries: {ministry_ids}. All '
 				'services processed in a batch should '
@@ -769,7 +843,8 @@ class MinistriesHandler:
 
 		if processing_ministry_id != task_ministry_id:
 			logger.error(
-				'Mismatch between ministry_id of service '
+				f'[{self.handler_name}]\n'
+				f'Mismatch between ministry_id of service '
 				f'tasks ({task_ministry_id}) and '
 				f'ministry_id of processed service entries '
 				f'({processing_ministry_id}).',
@@ -794,6 +869,7 @@ class MinistriesHandler:
 		)
 
 		logger.info(
+			f'[{self.handler_name}]\n'
 			f'Service task list processed for ministry '
 			f'{processing_ministry_id} '
 			f'with {len(service_entries)} services. '
@@ -818,9 +894,10 @@ class MinistriesHandler:
 		"""
 		if not self.ministry_entries:
 			logger.warning(
-				'No ministry entries found in handler '
-				'state when retrieving ministry '
-				'identifiers.',
+				f'[{self.handler_name}]\n'
+				f'No ministry entries found in handler '
+				f'state when retrieving ministry '
+				f'identifiers.',
 				extra={'handler': self.handler_name},
 			)
 			raise ExecutorProcessingFailure(
@@ -853,6 +930,7 @@ class MinistriesHandler:
 		)
 		if not ministry_entry:
 			logger.error(
+				f'[{self.handler_name}]\n'
 				f'Ministry entry not found in handler '
 				f'state for ministry_id {ministry_id} when '
 				f'applying ministry page processed data.',
@@ -898,3 +976,164 @@ class MinistriesHandler:
 				task_log=task_log,
 				task=task,
 			)
+
+		logger.info(
+			f'[{self.handler_name}]\n'
+			f'Batch applied ministry page overview data '
+			f'for {len(ministry_page_overview_results)} '
+			f'ministries.',
+			extra={'task': task_log},
+		)
+
+	def apply_agency_count_by_ministry(
+		self,
+		agency_count_by_ministry: dict[str, int],
+		task_log: str,
+		task: SchedulerTask,
+	) -> None:
+		"""
+		Method to apply updates to the ministries state
+		using a dictionary of agency count by ministry.
+		"""
+		for (
+			ministry_id,
+			agency_count,
+		) in agency_count_by_ministry.items():
+			if ministry_id in self.ministry_entries:
+				ministry_entry = self.ministry_entries[
+					ministry_id
+				]
+				ministry_entry.observed_agency_count = (
+					agency_count
+				)
+				self.ministry_entries[ministry_id] = (
+					ministry_entry
+				)
+
+		logger.info(
+			f'[{self.handler_name}]\n'
+			f'[TASK INFO]: Applied update to ministries '
+			f'state with agency count for '
+			f'{len(agency_count_by_ministry)} '
+			f'ministries.',
+			extra={'task': task_log},
+		)
+
+	def apply_service_count_by_ministry(
+		self,
+		service_count_by_ministry: dict[str, int],
+		task_log: str,
+		task: SchedulerTask,
+	) -> None:
+		"""
+		Method to apply updates to the ministries state
+		using a dictionary of service count by ministry.
+		"""
+		for (
+			ministry_id,
+			service_count,
+		) in service_count_by_ministry.items():
+			if ministry_id in self.ministry_entries:
+				ministry_entry = self.ministry_entries[
+					ministry_id
+				]
+				ministry_entry.observed_service_count = (
+					service_count
+				)
+				self.ministry_entries[ministry_id] = (
+					ministry_entry
+				)
+
+		logger.info(
+			f'[{self.handler_name}]\n'
+			f'[TASK INFO]: Applied update to ministries '
+			f'state with service count for '
+			f'{len(service_count_by_ministry)} '
+			f'ministries.',
+			extra={'task': task_log},
+		)
+
+	def apply_department_count_by_ministry(
+		self,
+		department_count_by_ministry: dict[str, int],
+		task_log: str,
+		task: SchedulerTask,
+	) -> None:
+		"""
+		Method to apply updates to the ministries state
+		using a dictionary of department count by ministry.
+		"""
+		for (
+			ministry_id,
+			department_count,
+		) in department_count_by_ministry.items():
+			if ministry_id in self.ministry_entries:
+				ministry_entry = self.ministry_entries[
+					ministry_id
+				]
+				ministry_entry.observed_department_count = (
+					department_count
+				)
+				self.ministry_entries[ministry_id] = (
+					ministry_entry
+				)
+
+		logger.info(
+			f'[{self.handler_name}]\n'
+			f'[TASK INFO]: Applied update to ministries '
+			f'state with department count for '
+			f'{len(department_count_by_ministry)} '
+			f'ministries.',
+			extra={'task': task_log},
+		)
+
+	# --- Finalisation and analytics methods --- #
+
+	def ministries_insights(
+		self, ministry_df: pd.DataFrame
+	) -> None:
+		"""
+		Use the insights engine to render a report
+		based on the ministry data.
+		"""
+
+		insights = render_insights_report(
+			df=ministry_df,
+			id_col='ministry_id',
+			state=self.ministry_entries,
+			title='Ministry Insights',
+		)
+		write_file(
+			path=self.insights_file,
+			content=insights,
+		)
+
+	def finalise(self) -> None:
+		"""
+		Method to finalise the Ministry handler by saving
+		the processed data to files and performing analysis.
+		"""
+		# Convert state to DataFrame for analysis
+		ministry_df = state_to_df(
+			self.ministry_entries, MinistryEntry
+		)
+
+		# Save final state
+		self.save_state()
+
+		# Save processed data to files
+		save_df(
+			df=ministry_df,
+			csv_path=self.processed_data_csv,
+			json_path=self.processed_data_json,
+		)
+
+		# Produce insights
+		self.ministries_insights(ministry_df)
+
+		logger.info(
+			f'[{self.handler_name}]\n'
+			f'Ministry handler finalised. Processed data '
+			f'saved to {self.processed_data_dir!r} and '
+			f'insights saved to {self.insights_file!r}.',
+		)
