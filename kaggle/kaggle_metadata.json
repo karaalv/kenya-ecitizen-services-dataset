@@ -1,1 +1,20 @@
-// TODO: Kaggle metadata file
+{
+  "title": "Kenya eCitizen Services Dataset (February 2026)",
+  "id": "alvinkaranja/kenya-ecitizen-services-dataset",
+  "licenses": [
+    {
+      "name": "CC-BY-4.0"
+    }
+  ],
+  "tags": [
+    "government",
+    "kenya",
+    "public services",
+    "digital government",
+    "civic tech",
+    "web scraping",
+    "public administration"
+  ],
+  "subtitle": "Structured snapshot of publicly listed services on the Kenya eCitizen platform",
+  "description": "This dataset provides a structured snapshot of ministries, departments, agencies, services, and FAQs publicly listed on the Kenya eCitizen platform as of 14 February 2026."
+}

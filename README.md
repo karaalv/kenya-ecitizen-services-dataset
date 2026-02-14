@@ -26,10 +26,70 @@
 
 ## Data Freshness and Coverage
 
-<!-- TODO: Finish this section after the scrape -->
-- This dataset represents a snapshot of the eCitizen platform. The scrape was performed on `14 February 2026`, and there are currently no guarantees of ongoing updates.
-- The eCitizen platform reports hosting over 22,000 government services. This scrape captured approximately `number` services.
-  <!-- TODO: Finish this bit with a clear explanation of coverage limitations -->
+This dataset represents a snapshot of the eCitizen platform.
+The scrape was performed on **14 February 2026**. There are no guarantees of ongoing updates, and the dataset should be treated as a point-in-time extraction.
+
+### Platform Coverage
+
+The eCitizen platform publicly reports hosting **over 22,000 government services**.
+However, this scrape identified and extracted **5,489 services** that are directly listed and navigable through the platform’s public ministry → department → agency structure.
+
+This represents the complete set of services that are:
+
+- Directly exposed via ministry and agency landing pages
+- Linked through standard public navigation paths
+- Accessible without authentication or hidden query mechanisms
+
+No duplicate services were observed.
+
+### Interpreting the 22,000 Figure
+
+The substantial gap between the reported “22,000+ services” and the 5,489 services observed suggests that:
+
+- The reported figure may include:
+  - Sub-services
+  - Transactional variations
+  - Form-level endpoints
+  - Internal system entries
+- Some services may be nested in deeper navigation layers not surfaced through the primary ministry/agency hierarchy
+- Certain services may only be accessible after authentication, form progression, or dynamic interaction
+
+There is no evidence that the discrepancy is caused by scraper malfunction.
+Given the structured and consistent extraction across ministries, agencies, and departments, the observed service count reflects the services that are programmatically discoverable via the publicly exposed site structure.
+
+That said, complete enumeration of all possible transactional endpoints remains future work.
+
+### Structural Consistency
+
+Across entities:
+
+- **27 ministries** extracted
+- **54 departments** extracted
+- **286 agencies** extracted
+- **5,489 services** extracted
+- **15 FAQs** extracted
+
+No duplicate IDs were detected in any entity.
+
+Minor discrepancies were observed between reported and observed counts for certain ministries, but these remain negligible (typically differences of 1–2 services) and are likely attributable to transient listing differences or conditional visibility rather than systemic extraction issues.
+
+### Missing Data
+
+Missing values are minimal and correspond to fields that are genuinely absent on the website rather than extraction errors. For example:
+
+- Two ministries lack descriptions
+- Two departments lack observed service counts
+- One agency lacks description and logo metadata
+
+The services dataset itself contains no missing values in core relational fields.
+
+### Summary
+
+This dataset captures the publicly navigable service surface of the eCitizen platform with high structural integrity and minimal data loss.
+
+While the platform’s reported service total significantly exceeds the number of directly discoverable services, the extracted dataset represents the coherent, publicly structured layer of the system.
+
+Deeper transactional enumeration, hidden endpoints, and authenticated flows are intentionally out of scope and are left for future expansion.
 
 ## Dataset Structure and Documentation
 

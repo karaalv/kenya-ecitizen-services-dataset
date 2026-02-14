@@ -13,6 +13,8 @@ This document summarises the review and interpretation of relevant legal, ethica
 - The eCitizen `robots.txt` file was reviewed prior to scraping. Paths targeted by the scraper (e.g., ministries, agencies, public service listings) were **not listed as disallowed** in the robots directives.
 - No scraping was performed against paths explicitly disallowed for all user agents. This aligns the collection process with standard crawler expectations.
 
+![Screenshot of eCitizen robots.txt showing allowed paths](./assets/ecitizen_robots.png)
+
 ## 3. Terms and Conditions
 
 - eCitizen’s Terms and Conditions govern the use of the platform, including access, user obligations, and prohibited behaviours.
